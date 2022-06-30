@@ -5,10 +5,11 @@ module.exports = {
     node: true,
   },
   extends: [
-    "eslint:recommended",
-    "google",
+    'airbnb-base',
   ],
   rules: {
-    quotes: ["error", "double"],
+    'max-len': ['off'],
+    'no-use-before-define': ['off'],
+    'max-classes-per-file': ['off'],
   },
 };
