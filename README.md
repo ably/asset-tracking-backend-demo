@@ -19,6 +19,7 @@ This demo backend service has been designed to interoperate with the following d
 - **Subscriber**: Used by customers / consumers, to track their delivery.
   - [Android](https://github.com/ably/asset-tracking-android-customer-app-demo)
   - [iOS](https://github.com/ably/asset-tracking-ios-customer-app-demo)
+  - Web (repository link TBC)
 
 ## Runtime Requirements
 
