@@ -30,3 +30,57 @@ account with support for
 and
 [Functions](https://firebase.google.com/products/functions)
 (which probably means a paid plan).
+
+## Deployment
+
+From root, the following command builds the functions and pushes them out to Firebase:
+
+    firebase deploy --only functions
+
+as described in:
+[Firebase: Get started: Deploy functions to a production environment](https://firebase.google.com/docs/functions/get-started#deploy-functions-to-a-production-environment)
+
+## Development and Testing
+
+In common with most Firebase projects,
+[the contents of the `functions` folder](functions/)
+is a [Node.js](https://nodejs.org/) application using [npm](https://www.npmjs.com/) for dependency management.
+This means that the `npm` commands should be utilised within that folder,
+while `firebase` commands are generally used from root.
+
+### Testing with the Local Emulator
+
+From root, the following command builds the functions and serves them locally:
+
+    firebase emulators:start
+
+as described in
+[Firebase: Get started: Emulate execution of your functions](https://firebase.google.com/docs/functions/get-started#emulate-execution-of-your-functions)
+
+If it emits the following `functions` warning to the console:
+
+```
+i  emulators: Starting emulators: functions
+⚠  functions: The following emulators are not running, calls to these services from the Functions emulator will affect production: auth, firestore, database, hosting, pubsub, storage
+```
+
+Indicating that HTTP requests made against this functions emulator instance will use the live Firestore database.
+This is probably fine, perhaps preferable for some testing, but is worth noting as caution should be exercised.
+
+It also emits information to the console, which will look something like:
+
+```
+┌───────────┬────────────────┬─────────────────────────────────┐
+│ Emulator  │ Host:Port      │ View in Emulator UI             │
+├───────────┼────────────────┼─────────────────────────────────┤
+│ Functions │ localhost:5001 │ http://localhost:4000/functions │
+└───────────┴────────────────┴─────────────────────────────────┘
+```
+
+where you can visit port `4000` from your browser for access to function runtime logs, amongst much more.
+The functions themselves are hosted at port `5001`, so can be tested there, for example:
+
+    curl http://localhost:5001/ably-asset-tracking-demos/europe-west2/deliveryService -u "username:password"
+
+It's also worth noting that the emulator supports automatic reloading, so the effect of changes you make to the source code files while the emulator is running will immediately be available to observe.
+This can make for a very productive debugging experience.
