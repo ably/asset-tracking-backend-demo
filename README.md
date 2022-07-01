@@ -21,6 +21,20 @@ This demo backend service has been designed to interoperate with the following d
   - [iOS](https://github.com/ably/asset-tracking-ios-customer-app-demo)
   - Web (repository link TBC)
 
+### Delivery Lifecycle
+
+In the simplest case, where a Rider is only carrying a single Customer order at any given time:
+
+1. Customer places order for Delivery and starts observing this Delivery, though they will not see any Location updates yet
+2. Rider requests, or is assigned, the Delivery
+3. Rider travels to the Producer
+4. Producer gives the Delivery to the Rider
+5. Rider starts transmitting Location updates for this Delivery, meaning that the Customer starts seeing Location updates now
+6. Rider travels from Producer to Customer with the Delivery
+7. Rider gives the Delivery to the Customer
+8. Rider stops transmitting Location updates for this Delivery
+9. Customer stops tracking Location updates
+
 ## Runtime Requirements
 
 A
