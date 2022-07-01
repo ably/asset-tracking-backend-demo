@@ -42,9 +42,9 @@ In respect of the state of the Rider, in the context of a particular Delivery, f
 
 | Rider State | Emulated by this demo backend service? |
 | ----------- | -------------------------------------- |
-| accepted the delivery | Yes, step 2 |
-| waiting at the restaurant | No |
-| has picked up your order | No |
+| accepted the Delivery | Yes, step 2 |
+| waiting at the Merchant | No |
+| has picked up your Delivery | No |
 | is on the way | Yes, step 5 |
 | is nearby | No |
 | is here | Yes, step 8 |
