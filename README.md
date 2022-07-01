@@ -23,7 +23,7 @@ This demo backend service has been designed to interoperate with the following d
 
 ### Delivery Lifecycle
 
-In the simplest case, where a Rider is only carrying a single Customer order at any given time:
+In the simplest scenario, where a Rider is only carrying a single Customer order at any given time:
 
 1. Customer places order for Delivery and starts observing this Delivery, though they will not see any Location updates yet
 2. Rider requests, or is assigned, the Delivery
@@ -34,6 +34,26 @@ In the simplest case, where a Rider is only carrying a single Customer order at 
 7. Rider gives the Delivery to the Customer
 8. Rider stops transmitting Location updates for this Delivery
 9. Customer stops tracking Location updates
+
+A real delivery backend service will have states for the Delivery order including stages like "placed", "accepted by Merchant" and "being prepared".
+This demo backend service does not emulate those stages, to keep things simpler, instead focussing on the core Delivery Location tracking element.
+
+In respect of the state of the Rider, in the context of a particular Delivery, from the perspective of the Customer, referencing the steps from the simplest scenario outlined above:
+
+| Rider State | Emulated by this demo backend service? |
+| ----------- | -------------------------------------- |
+| accepted the delivery | Yes, step 2 |
+| waiting at the restaurant | No |
+| has picked up your order | No |
+| is on the way | Yes, step 5 |
+| is nearby | No |
+| is here | Yes, step 8 |
+
+The Customer expects to see a map showing:
+
+- The destination
+- The Merchant
+- The Rider
 
 ## Runtime Requirements
 
