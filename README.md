@@ -133,12 +133,12 @@ The content type for requests and responses is `application/json`, with root of 
 Used by the Customer app to kick off a new Delivery requirement.
 Creates a new order with a unique order identifier.
 
-Request:
+Request properties:
 
 - `from`: [Location](#location-type) of the Merchant.
 - `to`: [Location](#location-type) of the Customer.
 
-Response:
+Response properties:
 
 - `orderId`: The unique order identifier for this new Delivery. A positive integer.
 - `jwt`: The JSON Web Token (JWT) to be used to subscribe for Location updates for this new Delivery.
@@ -170,7 +170,7 @@ Example response:
 Used by the Rider app to self-assign a Delivery requirement.
 Modifies an unassigned order to assign it to this rider.
 
-Response:
+Response properties:
 
 - `customerUsername`: The username of the Customer who created this Delivery requirement.
 - `from`: [Location](#location-type) of the Merchant.
@@ -203,7 +203,7 @@ Example response:
 }
 ```
 
-This endpoint can safely be called multiple times and, as such, is idempotent.
+This endpoint can safely be called multiple times and, as such, can be considered idempotent.
 The response includes only fields were present in the database before the request was made, which means that subsequent
 calls to this endpoint by the same rider for the same order will observe an additional field in the response by the name
 of `riderUsername` - this is expected behaviour, being a side effect of the simplistic implementation of this demo
