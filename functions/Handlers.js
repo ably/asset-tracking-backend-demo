@@ -1,9 +1,10 @@
 const {
   firestore,
+  USER_TYPE_CUSTOMER,
+  STATUS_CODE_BAD_REQUEST,
+  STATUS_CODE_CREATED,
+  STATUS_CODE_UNAUTHORIZED,
 } = require('./common');
-
-const STATUS_CODE_CREATED = 201;
-const STATUS_CODE_BAD_REQUEST = 400;
 
 class RequestError extends Error {
   constructor(message = 'Invalid request.', ...args) {
@@ -12,6 +13,14 @@ class RequestError extends Error {
 }
 
 exports.createOrder = async (req, res) => {
+  if (res.locals.userType !== USER_TYPE_CUSTOMER) {
+    res
+      .status(STATUS_CODE_UNAUTHORIZED)
+      .type('text/plain')
+      .send('This API is only for Customer use.');
+    return;
+  }
+
   const { from, to } = req.body;
   try {
     assertLocation(from);
@@ -20,6 +29,7 @@ exports.createOrder = async (req, res) => {
     if (e instanceof RequestError) {
       res
         .status(STATUS_CODE_BAD_REQUEST)
+        .type('text/plain')
         .send(e.message);
       return;
     }

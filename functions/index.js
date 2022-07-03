@@ -7,6 +7,8 @@ const functions = require('firebase-functions');
 
 const {
   firestore,
+  isUserType,
+  STATUS_CODE_UNAUTHORIZED,
 } = require('./common');
 
 const {
@@ -14,8 +16,6 @@ const {
 } = require('./Handlers');
 
 const { logger } = functions;
-
-const STATUS_CODE_UNAUTHORIZED = 401;
 
 const authorizeMiddleware = async (req, res, next) => {
   const credentials = basicAuth(req);
@@ -44,7 +44,16 @@ const authorizeMiddleware = async (req, res, next) => {
   if (!data) {
     logger.info(`User '${name}' not found.`);
   } else if (data.password === pass) {
-    res.locals.username = name; // make available for other middleware, specifically API handlers
+    const userType = data.type;
+    if (!isUserType(userType)) {
+      next(new Error(`User type '${userType}', as specified for user '${name}', is unknown.`));
+      return;
+    }
+
+    // make available for other middleware, specifically API handlers
+    res.locals.username = name;
+    res.locals.userType = userType;
+
     next(); // Success
     return;
   }
