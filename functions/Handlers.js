@@ -1,3 +1,5 @@
+const jwt = require('jsonwebtoken');
+
 const {
   firestore,
   USER_TYPE_CUSTOMER,
@@ -22,7 +24,7 @@ const fail = (res, statusCode, message) => res
 
 const COLLECTION_NAME_ORDERS = 'orders';
 
-exports.createOrder = async (req, res) => {
+exports.createOrder = async (req, res, next) => {
   if (res.locals.userType !== USER_TYPE_CUSTOMER) {
     fail(res, STATUS_CODE_UNAUTHORIZED, 'This API is only for Customer use.');
     return;
@@ -63,13 +65,24 @@ exports.createOrder = async (req, res) => {
     return id;
   });
 
+  let webToken;
+  try {
+    webToken = createWebToken();
+  } catch (error) {
+    next(error); // intentionally a 500 Internal Server Error
+    return;
+  }
+
   // Success
   res
     .status(STATUS_CODE_CREATED)
-    .send({ orderId });
+    .send({
+      orderId,
+      jwt: webToken,
+    });
 };
 
-exports.assignOrder = async (req, res) => {
+exports.assignOrder = async (req, res, next) => {
   if (res.locals.userType !== USER_TYPE_RIDER) {
     fail(res, STATUS_CODE_UNAUTHORIZED, 'This API is only for Rider use.');
     return;
@@ -119,10 +132,21 @@ exports.assignOrder = async (req, res) => {
     return;
   }
 
+  let webToken;
+  try {
+    webToken = createWebToken();
+  } catch (error) {
+    next(error); // intentionally a 500 Internal Server Error
+    return;
+  }
+
   // Success
   res
     .status(STATUS_CODE_CREATED)
-    .send(data);
+    .send({
+      ...data,
+      jwt: webToken,
+    });
 };
 
 function assertNumber(value) {
@@ -153,4 +177,28 @@ function assertLocation(location) {
   }
   assertLatitude(location.latitude);
   assertLongitude(location.longitude);
+}
+
+function createWebToken(clientId) {
+  const key = process.env.ABLY_API_KEY;
+  if (typeof key !== 'string') {
+    throw new Error('Environment variable for Ably API key not found.');
+  }
+
+  const keyParts = key.split(':', 2);
+  const keyName = keyParts[0];
+  const keySecret = keyParts[1];
+  const ttlSeconds = 3600;
+
+  const payload = {
+    'x-ably-capability': JSON.stringify({ '*': ['publish', 'subscribe'] }),
+    'x-ably-clientId': clientId,
+  };
+
+  const options = {
+    expiresIn: ttlSeconds,
+    keyid: `${keyName}`,
+  };
+
+  return jwt.sign(payload, keySecret, options);
 }
