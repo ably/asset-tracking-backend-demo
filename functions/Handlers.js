@@ -90,7 +90,7 @@ exports.assignOrder = async (req, res, next) => {
 
   const orderId = parseInt(req.params.orderId, 10);
   if (orderId < 0) {
-    fail(res, STATUS_CODE_BAD_REQUEST, `orderId '${orderId} is not a positive integer.`);
+    fail(res, STATUS_CODE_NOT_FOUND, `orderId '${orderId} is not a positive integer.`);
     return;
   }
 
