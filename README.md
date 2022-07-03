@@ -114,7 +114,7 @@ It also emits information to the console, which will look something like:
 where you can visit port `4000` from your browser for access to function runtime logs, amongst much more.
 The functions themselves are hosted at port `5001`, so can be tested there, for example:
 
-    curl http://localhost:5001/ably-asset-tracking-demos/europe-west2/deliveryService -u "username:password"
+    curl http://localhost:5001/<firebase-project-name>/<firebase-region>/deliveryService -u "username:password"
 
 It's also worth noting that the emulator supports automatic reloading, so the effect of changes you make to the source code files while the emulator is running will immediately be available to observe.
 This can make for a very productive debugging experience.
