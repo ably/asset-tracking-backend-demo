@@ -15,11 +15,13 @@ const {
 
 const { logger } = functions;
 
+const STATUS_CODE_UNAUTHORIZED = 401;
+
 const authorizeMiddleware = async (req, res, next) => {
   const credentials = basicAuth(req);
   if (!credentials) {
     logger.info('Invalid Authorization header, or header missing.');
-    res.sendStatus(401);
+    res.sendStatus(STATUS_CODE_UNAUTHORIZED);
     return;
   }
 
@@ -48,7 +50,7 @@ const authorizeMiddleware = async (req, res, next) => {
   }
 
   logger.info(`Incorrect password supplied for user '${name}'. Received '${pass}', expected '${data.password}'.`);
-  res.sendStatus(401);
+  res.sendStatus(STATUS_CODE_UNAUTHORIZED);
 };
 
 const app = express();
