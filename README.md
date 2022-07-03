@@ -135,8 +135,8 @@ Creates a new order with a unique order identifier.
 
 Request:
 
-- `from`: Location of the Merchant.
-- `to`: Location of the Customer.
+- `from`: [Location](#location-type) of the Merchant.
+- `to`: [Location](#location-type) of the Customer.
 
 Response:
 
@@ -160,3 +160,12 @@ Example response:
   "orderId": 3
 }
 ```
+
+## REST API Types
+
+### Location Type
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `latitude` | number | **Required** - Must be a value between `-90.0` and `90.0`. |
+| `longitude` | number | **Required** - Must be a value between `-180.0` and `180.0`. |
