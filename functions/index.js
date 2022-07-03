@@ -38,6 +38,7 @@ const authorizeMiddleware = async (req, res, next) => {
   if (!data) {
     logger.info(`User '${name}' not found.`);
   } else if (data.password === pass) {
+    res.locals.username = name; // make available for other middleware, specifically API handlers
     next(); // Success
     return;
   }
