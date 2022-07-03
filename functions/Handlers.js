@@ -50,7 +50,7 @@ exports.createOrder = async (req, res) => {
     // Transaction Step 3: Make Changes
     transaction.set(singletonDocumentReference, { nextId: id + 1 });
     transaction.create(firestore.collection('orders').doc(id.toString()), {
-      username: res.locals.username,
+      customerUsername: res.locals.username,
       from,
       to,
     });
