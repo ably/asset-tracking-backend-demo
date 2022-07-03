@@ -1,9 +1,12 @@
 const {
   firestore,
   USER_TYPE_CUSTOMER,
+  USER_TYPE_RIDER,
   STATUS_CODE_BAD_REQUEST,
   STATUS_CODE_CREATED,
   STATUS_CODE_UNAUTHORIZED,
+  STATUS_CODE_CONFLICT,
+  STATUS_CODE_NOT_FOUND,
 } = require('./common');
 
 class RequestError extends Error {
@@ -12,12 +15,16 @@ class RequestError extends Error {
   }
 }
 
+const fail = (res, statusCode, message) => res
+  .status(statusCode)
+  .type('text/plain')
+  .send(message);
+
+const COLLECTION_NAME_ORDERS = 'orders';
+
 exports.createOrder = async (req, res) => {
   if (res.locals.userType !== USER_TYPE_CUSTOMER) {
-    res
-      .status(STATUS_CODE_UNAUTHORIZED)
-      .type('text/plain')
-      .send('This API is only for Customer use.');
+    fail(res, STATUS_CODE_UNAUTHORIZED, 'This API is only for Customer use.');
     return;
   }
 
@@ -27,10 +34,7 @@ exports.createOrder = async (req, res) => {
     assertLocation(to);
   } catch (e) {
     if (e instanceof RequestError) {
-      res
-        .status(STATUS_CODE_BAD_REQUEST)
-        .type('text/plain')
-        .send(e.message);
+      fail(res, STATUS_CODE_BAD_REQUEST, e.message);
       return;
     }
     throw e;
@@ -49,7 +53,7 @@ exports.createOrder = async (req, res) => {
 
     // Transaction Step 3: Make Changes
     transaction.set(singletonDocumentReference, { nextId: id + 1 });
-    transaction.create(firestore.collection('orders').doc(id.toString()), {
+    transaction.create(firestore.collection(COLLECTION_NAME_ORDERS).doc(id.toString()), {
       customerUsername: res.locals.username,
       from,
       to,
@@ -59,9 +63,66 @@ exports.createOrder = async (req, res) => {
     return id;
   });
 
+  // Success
   res
     .status(STATUS_CODE_CREATED)
     .send({ orderId });
+};
+
+exports.assignOrder = async (req, res) => {
+  if (res.locals.userType !== USER_TYPE_RIDER) {
+    fail(res, STATUS_CODE_UNAUTHORIZED, 'This API is only for Rider use.');
+    return;
+  }
+
+  const orderId = parseInt(req.params.orderId, 10);
+  if (orderId < 0) {
+    fail(res, STATUS_CODE_BAD_REQUEST, `orderId '${orderId} is not a positive integer.`);
+    return;
+  }
+
+  const documentReference = firestore.collection(COLLECTION_NAME_ORDERS).doc(orderId.toString());
+  const { username } = res.locals;
+  const { failureReason, statusCode, data } = await firestore.runTransaction(async (transaction) => {
+    // Transaction Step 1: Read
+    const snapshot = await transaction.get(documentReference);
+
+    // Transaction Step 2: Logic
+    if (!snapshot.exists) {
+      return {
+        failureReason: `An order with id '${orderId}' does not exist.`,
+        statusCode: STATUS_CODE_NOT_FOUND,
+      };
+    }
+    const { riderUsername } = snapshot.data();
+    const isAlreadyAssignedToThisUser = (riderUsername === username);
+    if (!isAlreadyAssignedToThisUser && riderUsername !== undefined) {
+      return {
+        failureReason: `The order with id '${orderId}' is already assigned to another rider.`,
+        statusCode: STATUS_CODE_CONFLICT,
+      };
+    }
+
+    // Transaction Step 3: Make Changes
+    if (!isAlreadyAssignedToThisUser) {
+      transaction.update(documentReference, {
+        riderUsername: username,
+      });
+    }
+
+    // Transaction Success
+    return { data: snapshot.data() };
+  });
+
+  if (failureReason) {
+    fail(res, statusCode, failureReason);
+    return;
+  }
+
+  // Success
+  res
+    .status(STATUS_CODE_CREATED)
+    .send(data);
 };
 
 function assertNumber(value) {

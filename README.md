@@ -161,6 +161,50 @@ Example response:
 }
 ```
 
+### Assign Order
+
+`PUT /orders/<orderId>`
+
+Used by the Rider app to self-assign a Delivery requirement.
+Modifies an unassigned order to assign it to this rider.
+
+Response:
+
+- `customerUsername`: The username of the Customer who created this Delivery requirement.
+- `from`: [Location](#location-type) of the Merchant.
+- `to`: [Location](#location-type) of the Customer.
+
+Example request:
+
+```bash
+curl --verbose \
+  https://<firebase-region>-<firebase-project-name>.cloudfunctions.net/deliveryService/orders/<orderId> \
+  --user "username:password" \
+  --request PUT
+```
+
+Example response:
+
+```json
+{
+  "to": {
+    "longitude": 4,
+    "latitude": 3
+  },
+  "customerUsername": "quintin",
+  "from": {
+    "longitude":2,
+    "latitude":1
+  }
+}
+```
+
+This endpoint can safely be called multiple times and, as such, is idempotent.
+The response includes only fields were present in the database before the request was made, which means that subsequent
+calls to this endpoint by the same rider for the same order will observe an additional field in the response by the name
+of `riderUsername` - this is expected behaviour, being a side effect of the simplistic implementation of this demo
+backend service.
+
 ## REST API Types
 
 ### Location Type

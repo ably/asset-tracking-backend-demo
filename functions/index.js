@@ -13,6 +13,7 @@ const {
 
 const {
   createOrder,
+  assignOrder,
 } = require('./Handlers');
 
 const { logger } = functions;
@@ -76,6 +77,7 @@ app.use(authorizeMiddleware);
 app.get('/', (req, res) => res.send({ })); // returns empty object, as JSON, by way of auth confirmation
 
 app.post('/orders/', createOrder);
+app.put('/orders/:orderId', assignOrder);
 
 // Expose Express API as a single Cloud Function.
 exports.deliveryService = functions
