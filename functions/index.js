@@ -5,10 +5,14 @@ const basicAuth = require('basic-auth');
 // The Cloud Functions for Firebase SDK to create Cloud Functions and set up triggers.
 const functions = require('firebase-functions');
 
-// The Firebase Admin SDK to access Firestore.
-const admin = require('firebase-admin');
+const {
+  firestore,
+} = require('./common');
 
-admin.initializeApp();
+const {
+  createOrder,
+} = require('./Handlers');
+
 const { logger } = functions;
 
 const authorizeMiddleware = async (req, res, next) => {
@@ -23,7 +27,7 @@ const authorizeMiddleware = async (req, res, next) => {
 
   let data;
   try {
-    const snapshot = await admin.firestore().collection('users').doc(name).get();
+    const snapshot = await firestore.collection('users').doc(name).get();
     data = snapshot.data();
   } catch (error) {
     // Ask Express to respond with HTTP 500 Internal Server Error.
@@ -55,8 +59,12 @@ app.use(cors({ origin: true }));
 // Add middleware to check credentials supplied via HTTP Basic auth.
 app.use(authorizeMiddleware);
 
+// TODO Understand why we _don't_ appear to need `app.use(express.json());`. This works without it.
+
 // Our Express API.
 app.get('/', (req, res) => res.send({ })); // returns empty object, as JSON, by way of auth confirmation
+
+app.post('/orders/', createOrder);
 
 // Expose Express API as a single Cloud Function.
 exports.deliveryService = functions

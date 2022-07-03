@@ -118,3 +118,33 @@ The functions themselves are hosted at port `5001`, so can be tested there, for 
 
 It's also worth noting that the emulator supports automatic reloading, so the effect of changes you make to the source code files while the emulator is running will immediately be available to observe.
 This can make for a very productive debugging experience.
+
+## REST API
+
+The content type for requests and responses is `application/json`, with root of [JSON](https://www.json.org/) `object` type.
+
+### Create Order
+
+`POST /orders`
+
+Used by the Customer app to kick off a new Delivery requirement.
+Creates a new order with a unique order identifier.
+
+Request:
+
+- `from`: Location of the Merchant.
+- `to`: Location of the Customer.
+
+Response:
+
+- `orderId`: The unique order identifier for this new order. A positive integer.
+
+Example usage:
+
+```bash
+curl -v https://<firebase-region>-<firebase-project-name>.cloudfunctions.net/deliveryService/orders \
+  --user "username:password" \
+  --header "Content-Type: application/json" \
+  --request POST \
+  --data '{"from":{"latitude":1,"longitude":2},"to":{"latitude":3,"longitude":4}}'
+```
