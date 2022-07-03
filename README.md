@@ -142,7 +142,7 @@ Response:
 
 - `orderId`: The unique order identifier for this new order. A positive integer.
 
-Example usage:
+Example request:
 
 ```bash
 curl --verbose \
@@ -151,4 +151,12 @@ curl --verbose \
   --header "Content-Type: application/json" \
   --request POST \
   --data '{"from":{"latitude":1,"longitude":2},"to":{"latitude":3,"longitude":4}}'
+```
+
+Example response:
+
+```json
+{
+  "orderId": 3
+}
 ```
