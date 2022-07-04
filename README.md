@@ -209,6 +209,22 @@ calls to this endpoint by the same rider for the same order will observe an addi
 of `riderUsername` - this is expected behaviour, being a side effect of the simplistic implementation of this demo
 backend service.
 
+### Delete Order
+
+`DELETE /orders/<orderId>`
+
+Used by either the Rider app or the Customer app to remove, or otherwise declare finished, a Delivery requirement.
+Deletes an assigned order from the database.
+
+Example request:
+
+```bash
+curl --verbose \
+  https://<firebase-region>-<firebase-project-name>.cloudfunctions.net/deliveryService/orders/<orderId> \
+  --user "username:password" \
+  --request DELETE
+```
+
 ## REST API Types
 
 ### Location Type

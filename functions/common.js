@@ -5,6 +5,7 @@ admin.initializeApp();
 
 exports.firestore = admin.firestore();
 
+exports.STATUS_CODE_OK = 200;
 exports.STATUS_CODE_CREATED = 201;
 exports.STATUS_CODE_BAD_REQUEST = 400;
 exports.STATUS_CODE_UNAUTHORIZED = 401;

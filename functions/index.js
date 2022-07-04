@@ -14,6 +14,7 @@ const {
 const {
   createOrder,
   assignOrder,
+  deleteOrder,
 } = require('./Handlers');
 
 const { logger } = functions;
@@ -78,6 +79,7 @@ app.get('/', (req, res) => res.send({ })); // returns empty object, as JSON, by 
 
 app.post('/orders/', createOrder);
 app.put('/orders/:orderId', assignOrder);
+app.delete('/orders/:orderId', deleteOrder);
 
 // Expose Express API as a single Cloud Function.
 exports.deliveryService = functions

@@ -1,3 +1,4 @@
+const { user } = require('firebase-functions/v1/auth');
 const jwt = require('jsonwebtoken');
 
 const {
@@ -9,6 +10,7 @@ const {
   STATUS_CODE_UNAUTHORIZED,
   STATUS_CODE_CONFLICT,
   STATUS_CODE_NOT_FOUND,
+  STATUS_CODE_OK,
 } = require('./common');
 
 class RequestError extends Error {
@@ -147,6 +149,59 @@ exports.assignOrder = async (req, res, next) => {
       ...data,
       ablyToken: webToken,
     });
+};
+
+exports.deleteOrder = async (req, res) => {
+  const { userType } = res.locals;
+  const userIsRider = (userType === USER_TYPE_RIDER);
+  const userIsCustomer = (userType === USER_TYPE_CUSTOMER);
+  if (!(userIsRider || userIsCustomer)) {
+    fail(res, STATUS_CODE_UNAUTHORIZED, 'This API is only for use by either Rider or Customer.');
+    return;
+  }
+
+  const orderId = parseInt(req.params.orderId, 10);
+  if (orderId < 0) {
+    fail(res, STATUS_CODE_NOT_FOUND, `orderId '${orderId} is not a positive integer.`);
+    return;
+  }
+
+  const documentReference = firestore.collection(COLLECTION_NAME_ORDERS).doc(orderId.toString());
+  const { username } = res.locals;
+  const { failureReason, statusCode } = await firestore.runTransaction(async (transaction) => {
+    // Transaction Step 1: Read
+    const snapshot = await transaction.get(documentReference);
+
+    // Transaction Step 2: Logic
+    if (!snapshot.exists) {
+      return {
+        failureReason: `An order with id '${orderId}' does not exist.`,
+        statusCode: STATUS_CODE_NOT_FOUND,
+      };
+    }
+    const { riderUsername, customerUsername } = snapshot.data();
+    const allowedUsername = userIsRider ? riderUsername : customerUsername;
+    if (allowedUsername !== username) {
+      return {
+        failureReason: `The order with id '${orderId}' is not assigned to this ${userIsRider ? 'Rider' : 'Customer'}.`,
+        statusCode: STATUS_CODE_CONFLICT,
+      };
+    }
+
+    // Transaction Step 3: Make Changes
+    transaction.delete(documentReference);
+
+    // Transaction Success
+    return { };
+  });
+
+  if (failureReason) {
+    fail(res, statusCode, failureReason);
+    return;
+  }
+
+  // Success
+  res.sendStatus(STATUS_CODE_OK);
 };
 
 function assertNumber(value) {
