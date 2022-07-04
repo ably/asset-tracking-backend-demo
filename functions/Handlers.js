@@ -236,6 +236,10 @@ function createWebToken(clientId) {
   }
 
   const keyParts = key.split(':', 2);
+  if (keyParts.length !== 2) {
+    throw new Error('Ably API key did not split into exactly two parts.');
+  }
+
   const keyName = keyParts[0];
   const keySecret = keyParts[1];
   const ttlSeconds = 3600;
