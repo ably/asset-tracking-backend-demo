@@ -18,6 +18,7 @@ jobs:
         with:
           node-version: ${{ steps.tool-versions.outputs.nodejs }}
 
-      - run: |
+      - working-directory: functions
+        run: |
           npm ci
           npm run lint
