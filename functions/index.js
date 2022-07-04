@@ -7,6 +7,7 @@ const functions = require('firebase-functions');
 
 const {
   firestore,
+  fail,
   isUserType,
   STATUS_CODE_UNAUTHORIZED,
 } = require('./common');
@@ -23,7 +24,7 @@ const authorizeMiddleware = async (req, res, next) => {
   const credentials = basicAuth(req);
   if (!credentials) {
     logger.info('Invalid Authorization header, or header missing.');
-    res.sendStatus(STATUS_CODE_UNAUTHORIZED);
+    fail(res, STATUS_CODE_UNAUTHORIZED); // intentionally not providing a message as it could assist probing hackers
     return;
   }
 
@@ -61,7 +62,7 @@ const authorizeMiddleware = async (req, res, next) => {
   }
 
   logger.info(`Incorrect password supplied for user '${name}'. Received '${pass}', expected '${data.password}'.`);
-  res.sendStatus(STATUS_CODE_UNAUTHORIZED);
+  fail(res, STATUS_CODE_UNAUTHORIZED); // intentionally not providing a message as it could assist probing hackers
 };
 
 const app = express();

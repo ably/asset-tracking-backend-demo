@@ -156,7 +156,7 @@ curl --verbose \
   --data '{"from":{"latitude":1,"longitude":2},"to":{"latitude":3,"longitude":4}}'
 ```
 
-Example response:
+Example response (prettified):
 
 ```json
 {
@@ -190,7 +190,7 @@ curl --verbose \
   --request PUT
 ```
 
-Example response:
+Example response (prettified):
 
 ```json
 {
@@ -229,6 +229,33 @@ curl --verbose \
   https://<firebase-region>-<firebase-project-name>.cloudfunctions.net/deliveryService/orders/<orderId> \
   --user "username:password" \
   --request DELETE
+```
+
+## REST API Error Responses
+
+Service errors, in common with success responses, are returned with content type `application/json`,
+with root of [JSON](https://www.json.org/) `object` type. This object has a single property named `error`, whose value
+is another object, representing the `Error`. The `Error` object will usually have a single property named `message`,
+whose value is in a human readable form and is designed to be safe to display to the app user. The `message` property
+is intentionally not included for auth-related errors (i.e. `401` Unauthorized).
+
+Example request, designed to fail:
+
+```bash
+curl --verbose \
+  https://<firebase-region>-<firebase-project-name>.cloudfunctions.net/deliveryService/orders/999999999999 \
+  --user "username:password" \
+  --request DELETE
+```
+
+Example response (prettified):
+
+```json
+{
+  "error": {
+    "message": "An order with id '999999999999' does not exist."
+  }
+}
 ```
 
 ## REST API Types

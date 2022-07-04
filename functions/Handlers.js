@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 
 const {
   firestore,
+  fail,
   USER_TYPE_CUSTOMER,
   USER_TYPE_RIDER,
   STATUS_CODE_BAD_REQUEST,
@@ -17,11 +18,6 @@ class RequestError extends Error {
     super(message, ...args);
   }
 }
-
-const fail = (res, statusCode, message) => res
-  .status(statusCode)
-  .type('text/plain')
-  .send(message);
 
 const COLLECTION_NAME_ORDERS = 'orders';
 

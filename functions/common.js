@@ -25,3 +25,9 @@ exports.isUserType = (value) => {
       return false;
   }
 };
+
+exports.fail = (res, statusCode, message) => {
+  res
+    .status(statusCode)
+    .send({ error: { message } });
+};
