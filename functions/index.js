@@ -10,6 +10,7 @@ const {
   fail,
   isUserType,
   STATUS_CODE_UNAUTHORIZED,
+  STATUS_CODE_INTERNAL_SERVER_ERROR,
 } = require('./common');
 
 const {
@@ -65,6 +66,16 @@ const authorizeMiddleware = async (req, res, next) => {
   fail(res, STATUS_CODE_UNAUTHORIZED); // intentionally not providing a message as it could assist probing hackers
 };
 
+const errorHandlingMiddleware = (err, req, res, next) => {
+  if (res.headersSent) {
+    // per: https://expressjs.com/en/guide/error-handling.html
+    // We have to fallback to the default handler if headers have already been sent.
+    next(err);
+    return;
+  }
+  fail(res, STATUS_CODE_INTERNAL_SERVER_ERROR, err.message);
+};
+
 const app = express();
 
 // Automatically allow cross-origin requests.
@@ -81,6 +92,9 @@ app.get('/', (req, res) => res.send({ })); // returns empty object, as JSON, by 
 app.post('/orders/', createOrder);
 app.put('/orders/:orderId', assignOrder);
 app.delete('/orders/:orderId', deleteOrder);
+
+// Our custom error handler, which must be defined here, after other app.use() and routes calls.
+app.use(errorHandlingMiddleware);
 
 // Expose Express API as a single Cloud Function.
 exports.deliveryService = functions
