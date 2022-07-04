@@ -138,6 +138,8 @@ Request properties:
 - `from`: [Location](#location-type) of the Merchant.
 - `to`: [Location](#location-type) of the Customer.
 
+Successful response status code: `201` Created
+
 Response properties:
 
 - `orderId`: The unique order identifier for this new Delivery. A positive integer.
@@ -169,6 +171,8 @@ Example response:
 
 Used by the Rider app to self-assign a Delivery requirement.
 Modifies an unassigned order to assign it to this rider.
+
+Successful response status code: `201` Created
 
 Response properties:
 
@@ -215,6 +219,8 @@ backend service.
 
 Used by either the Rider app or the Customer app to remove, or otherwise declare finished, a Delivery requirement.
 Deletes an assigned order from the database.
+
+Successful response status code: `200` OK
 
 Example request:
 
