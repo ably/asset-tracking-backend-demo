@@ -141,7 +141,7 @@ Request properties:
 Response properties:
 
 - `orderId`: The unique order identifier for this new Delivery. A positive integer.
-- `jwt`: The JSON Web Token (JWT) to be used to subscribe for Location updates for this new Delivery.
+- `ablyToken`: The JSON Web Token (JWT) to be used to subscribe for Location updates for this new Delivery.
 
 Example request:
 
@@ -159,7 +159,7 @@ Example response:
 ```json
 {
   "orderId": 3,
-  "jwt": "<SECRET_REDACTED>"
+  "ablyToken": "<SECRET_REDACTED>"
 }
 ```
 
@@ -175,7 +175,7 @@ Response properties:
 - `customerUsername`: The username of the Customer who created this Delivery requirement.
 - `from`: [Location](#location-type) of the Merchant.
 - `to`: [Location](#location-type) of the Customer.
-- `jwt`: The JSON Web Token (JWT) to be used to publish Location updates for this Delivery.
+- `ablyToken`: The JSON Web Token (JWT) to be used to publish Location updates for this Delivery.
 
 Example request:
 
@@ -199,7 +199,7 @@ Example response:
     "longitude":2,
     "latitude":1
   },
-  "jwt": "<SECRET_REDACTED>"
+  "ablyToken": "<SECRET_REDACTED>"
 }
 ```
 

@@ -78,7 +78,7 @@ exports.createOrder = async (req, res, next) => {
     .status(STATUS_CODE_CREATED)
     .send({
       orderId,
-      jwt: webToken,
+      ablyToken: webToken,
     });
 };
 
@@ -145,7 +145,7 @@ exports.assignOrder = async (req, res, next) => {
     .status(STATUS_CODE_CREATED)
     .send({
       ...data,
-      jwt: webToken,
+      ablyToken: webToken,
     });
 };
 
