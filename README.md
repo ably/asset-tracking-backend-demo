@@ -84,7 +84,7 @@ we've conformed naming of secrets in the three locations you'll find them, that 
 
 ## Deployment
 
-From root, the following command builds the functions and pushes them out to Firebase:
+The following command builds the functions and pushes them out to Firebase:
 
     firebase deploy --only functions
 
