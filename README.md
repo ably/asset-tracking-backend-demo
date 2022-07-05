@@ -97,11 +97,11 @@ In common with most Firebase projects,
 [the contents of the `functions` folder](functions/)
 is a [Node.js](https://nodejs.org/) application using [npm](https://www.npmjs.com/) for dependency management.
 This means that the `npm` commands should be utilised within that folder,
-while `firebase` commands are generally used from root.
+while `firebase` commands are generally used from root (though they do work from here too).
 
 ### Testing with the Local Emulator
 
-From root, the following command builds the functions and serves them locally:
+The following command builds the functions and serves them locally:
 
     firebase emulators:start
 
