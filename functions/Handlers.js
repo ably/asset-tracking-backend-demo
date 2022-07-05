@@ -230,12 +230,12 @@ function assertLocation(location) {
 }
 
 function createWebToken(clientId) {
-  const key = process.env.ABLY_API_KEY;
-  if (typeof key !== 'string') {
+  const { ABLY_API_KEY } = process.env;
+  if (typeof ABLY_API_KEY !== 'string') {
     throw new Error('Environment variable for Ably API key not found.');
   }
 
-  const keyParts = key.split(':', 2);
+  const keyParts = ABLY_API_KEY.split(':', 2);
   if (keyParts.length !== 2) {
     throw new Error('Ably API key did not split into exactly two parts.');
   }

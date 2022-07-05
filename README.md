@@ -67,6 +67,19 @@ and
 [Functions](https://firebase.google.com/products/functions)
 (which probably means a paid plan).
 
+### Environment Variable and Secret Names
+
+To make this codebase more navigable alongisde associated service configurations,
+we've conformed naming of secrets in the three locations you'll find them, that is:
+
+1. As secrets [configured via the Firebase CLI](https://firebase.google.com/docs/functions/config-env#create-secret)
+2. As environment variables fed into the Node.js process at runtime
+3. In the source code, populated from `process.env`
+
+| Secret Name | Description |
+| ----------- | ----------- |
+| `ABLY_API_KEY` | Used to sign JSON web tokens returned by this service. |
+
 ## Deployment
 
 From root, the following command builds the functions and pushes them out to Firebase:
