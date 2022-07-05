@@ -333,6 +333,13 @@ This same, static key is also returned in responses from the [Assign Order](#ass
 
 Used by both the Rider app and the Customer app to request a new authentication token for use with the Ably service.
 
+Apps will need to call this endpoint in response to a token request callback from the Ably SDK.
+This will be in one of the following scenarios, relating to the auth token currently in use:
+
+- It has expired
+- It has insufficient capabilities:
+  Lack of permission to subscribe or publish, as applicable, to the channel for Location updates for a Delivery.
+
 Successful response status code: `200` OK
 
 Example request:
