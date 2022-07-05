@@ -66,10 +66,7 @@ exports.createOrder = async (req, res, next) => {
   const { GOOGLE_MAPS_API_KEY } = process.env;
   try {
     webToken = createWebToken();
-
-    if (!GOOGLE_MAPS_API_KEY) {
-      throw new Error('Environment variable for Google Maps API key not found.');
-    }
+    assertGoogleMapsApiKey(GOOGLE_MAPS_API_KEY);
   } catch (error) {
     next(error); // intentionally a 500 Internal Server Error
     return;
@@ -211,6 +208,24 @@ exports.deleteOrder = async (req, res) => {
   res.sendStatus(STATUS_CODE_OK);
 };
 
+exports.getGoogleMaps = async (req, res, next) => {
+  const { GOOGLE_MAPS_API_KEY } = process.env;
+
+  try {
+    assertGoogleMapsApiKey(GOOGLE_MAPS_API_KEY);
+  } catch (error) {
+    next(error); // intentionally a 500 Internal Server Error
+    return;
+  }
+
+  // Success
+  res
+    .status(STATUS_CODE_OK)
+    .send({
+      apiKey: GOOGLE_MAPS_API_KEY,
+    });
+};
+
 function assertNumber(value) {
   const type = typeof value;
   if (type !== 'number') {
@@ -267,4 +282,10 @@ function createWebToken(clientId) {
   };
 
   return jwt.sign(payload, keySecret, options);
+}
+
+function assertGoogleMapsApiKey(value) {
+  if (!value) {
+    throw new Error('Environment variable for Google Maps API key not found.');
+  }
 }

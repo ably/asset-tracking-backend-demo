@@ -165,7 +165,8 @@ Response properties:
 
 The `googleMapsApiKey` is static so apps do **not** need to handle the scenario that it changes from request to request.
 This means that values received from subsequent calls may be safely ignored, with the app's UI continuing to use
-visual components created using the key received from their first call to this endpoint.
+visual components created using the key received from their first call to this endpoint or the
+[Get Google Maps](#get-google-maps) endpoint.
 This key is likely needed for Android apps and will likely be ignored by iOS apps, in preference for using Apple maps.
 
 Example request:
@@ -260,6 +261,33 @@ curl --verbose \
   --user "username:password" \
   --request DELETE
 ```
+
+### Get Google Maps
+
+`GET /googleMaps`
+
+May be used by the Customer app to obtain the API key for use with Google Maps, typically in advance of calls to any
+other endpoint.
+
+Successful response status code: `200` OK
+
+Example request:
+
+```bash
+curl --verbose \
+  https://<firebase-region>-<firebase-project-name>.cloudfunctions.net/deliveryService/googleMaps \
+  --user "username:password"
+```
+
+Example response (prettified):
+
+```json
+{
+  "apiKey": "<SECRET_REDACTED>"
+}
+```
+
+This same, static key is also returned in responses from the [Create Order](#create-order) endpoint.
 
 ## REST API Error Responses
 

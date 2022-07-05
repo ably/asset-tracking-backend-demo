@@ -17,6 +17,7 @@ const {
   createOrder,
   assignOrder,
   deleteOrder,
+  getGoogleMaps,
 } = require('./Handlers');
 
 const { logger } = functions;
@@ -92,6 +93,7 @@ app.get('/', (req, res) => res.send({ })); // returns empty object, as JSON, by 
 app.post('/orders/', createOrder);
 app.put('/orders/:orderId', assignOrder);
 app.delete('/orders/:orderId', deleteOrder);
+app.get('/googleMaps', getGoogleMaps);
 
 // Our custom error handler, which must be defined here, after other app.use() and routes calls.
 app.use(errorHandlingMiddleware);
