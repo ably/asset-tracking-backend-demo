@@ -77,8 +77,12 @@ exports.createOrder = async (req, res, next) => {
     .status(STATUS_CODE_CREATED)
     .send({
       orderId,
-      ablyToken: webToken,
-      googleMapsApiKey: GOOGLE_MAPS_API_KEY,
+      ably: {
+        token: webToken,
+      },
+      googleMaps: {
+        apiKey: GOOGLE_MAPS_API_KEY,
+      },
     });
 };
 
@@ -150,8 +154,12 @@ exports.assignOrder = async (req, res, next) => {
     .status(STATUS_CODE_CREATED)
     .send({
       ...data,
-      ablyToken: webToken,
-      mapboxToken: MAPBOX_ACCESS_TOKEN,
+      ably: {
+        token: webToken,
+      },
+      mapbox: {
+        token: MAPBOX_ACCESS_TOKEN,
+      },
     });
 };
 

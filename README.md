@@ -160,10 +160,10 @@ Successful response status code: `201` Created
 Response properties:
 
 - `orderId`: The unique order identifier for this new Delivery. A positive integer.
-- `ablyToken`: The JSON Web Token (JWT) to be used to subscribe for Location updates for this new Delivery.
-- `googleMapsApiKey`: The API key to be used if rendering maps using Google's engine.
+- `ably.token`: The JSON Web Token (JWT) to be used to subscribe for Location updates for this new Delivery.
+- `googleMaps.apiKey`: The API key to be used if rendering maps using Google's engine.
 
-The `googleMapsApiKey` is static so apps do **not** need to handle the scenario that it changes from request to request.
+The `googleMaps.apiKey` is static so apps do **not** need to handle the scenario that it changes from request to request.
 This means that values received from subsequent calls may be safely ignored, with the app's UI continuing to use
 visual components created using the key received from their first call to this endpoint or the
 [Get Google Maps](#get-google-maps) endpoint.
@@ -185,8 +185,12 @@ Example response (prettified):
 ```json
 {
   "orderId": 3,
-  "ablyToken": "<SECRET_REDACTED>",
-  "googleMapsApiKey": "<SECRET_REDACTED>"
+  "ably": {
+    "token": "<SECRET_REDACTED>",
+  },
+  "googleMaps": {
+    "apiKey": "<SECRET_REDACTED>",
+  },
 }
 ```
 
@@ -204,11 +208,11 @@ Response properties:
 - `customerUsername`: The username of the Customer who created this Delivery requirement.
 - `from`: [Location](#location-type) of the Merchant.
 - `to`: [Location](#location-type) of the Customer.
-- `ablyToken`: The JSON Web Token (JWT) to be used to publish Location updates for this Delivery.
-- `mapboxToken`: The access token to be used for the Mapbox Navigation enhanced location engine.
+- `ably.token`: The JSON Web Token (JWT) to be used to publish Location updates for this Delivery.
+- `mapbox.token`: The access token to be used for the Mapbox Navigation enhanced location engine.
 
-The `mapboxToken` is static so apps do **not** need to handle the scenario that it changes from request to request.
-This means that an Ably Asset Tracking SDK publisher instance may be created using the `mapboxToken` received from the
+The `mapbox.token` is static so apps do **not** need to handle the scenario that it changes from request to request.
+This means that an Ably Asset Tracking SDK publisher instance may be created using the token received from the
 first call to this endpoint, with the token value received from subsequent calls safely ignored.
 
 Example request:
@@ -233,8 +237,12 @@ Example response (prettified):
     "longitude":2,
     "latitude":1
   },
-  "ablyToken": "<SECRET_REDACTED>",
-  "mapboxToken": "<SECRET_REDACTED>"
+  "ably": {
+    "token": "<SECRET_REDACTED>",
+  },
+  "mapbox": {
+    "token": "<SECRET_REDACTED>",
+  },
 }
 ```
 
