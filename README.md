@@ -79,6 +79,7 @@ we've conformed naming of secrets in the three locations you'll find them, that 
 | Secret Name | Description |
 | ----------- | ----------- |
 | `ABLY_API_KEY` | Used to sign JSON web tokens returned by this service. |
+| `MAPBOX_ACCESS_TOKEN` | Returned to Rider apps in [Assign Order](#assign-order) responses. |
 
 ## Deployment
 
@@ -195,6 +196,11 @@ Response properties:
 - `from`: [Location](#location-type) of the Merchant.
 - `to`: [Location](#location-type) of the Customer.
 - `ablyToken`: The JSON Web Token (JWT) to be used to publish Location updates for this Delivery.
+- `mapboxToken`: The access token to be used for the Mapbox Navigation enhanced location engine.
+
+The `mapboxToken` is static so apps do **not** need to handle the scenario that it changes from request to request.
+This means that an Ably Asset Tracking SDK publisher instance may be created using the `mapboxToken` received from the
+first call to this endpoint, with the token value received from subsequent calls safely ignored.
 
 Example request:
 
@@ -218,7 +224,8 @@ Example response (prettified):
     "longitude":2,
     "latitude":1
   },
-  "ablyToken": "<SECRET_REDACTED>"
+  "ablyToken": "<SECRET_REDACTED>",
+  "mapboxToken": "<SECRET_REDACTED>"
 }
 ```
 

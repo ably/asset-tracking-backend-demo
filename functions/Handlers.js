@@ -130,8 +130,13 @@ exports.assignOrder = async (req, res, next) => {
   }
 
   let webToken;
+  const { MAPBOX_ACCESS_TOKEN } = process.env;
   try {
     webToken = createWebToken();
+
+    if (!MAPBOX_ACCESS_TOKEN) {
+      throw new Error('Environment variable for Mapbox access token not found.');
+    }
   } catch (error) {
     next(error); // intentionally a 500 Internal Server Error
     return;
@@ -143,6 +148,7 @@ exports.assignOrder = async (req, res, next) => {
     .send({
       ...data,
       ablyToken: webToken,
+      mapboxToken: MAPBOX_ACCESS_TOKEN,
     });
 };
 
