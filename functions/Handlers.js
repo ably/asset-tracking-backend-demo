@@ -63,8 +63,13 @@ exports.createOrder = async (req, res, next) => {
   });
 
   let webToken;
+  const { GOOGLE_MAPS_API_KEY } = process.env;
   try {
     webToken = createWebToken();
+
+    if (!GOOGLE_MAPS_API_KEY) {
+      throw new Error('Environment variable for Google Maps API key not found.');
+    }
   } catch (error) {
     next(error); // intentionally a 500 Internal Server Error
     return;
@@ -76,6 +81,7 @@ exports.createOrder = async (req, res, next) => {
     .send({
       orderId,
       ablyToken: webToken,
+      googleMapsApiKey: GOOGLE_MAPS_API_KEY,
     });
 };
 

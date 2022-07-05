@@ -80,6 +80,7 @@ we've conformed naming of secrets in the three locations you'll find them, that 
 | ----------- | ----------- |
 | `ABLY_API_KEY` | Used to sign JSON web tokens returned by this service. |
 | `MAPBOX_ACCESS_TOKEN` | Returned to Rider apps in [Assign Order](#assign-order) responses. |
+| `GOOGLE_MAPS_API_KEY` | Returned to Customer apps in [Create Order](#create-order) responses. |
 
 ## Deployment
 
@@ -160,6 +161,12 @@ Response properties:
 
 - `orderId`: The unique order identifier for this new Delivery. A positive integer.
 - `ablyToken`: The JSON Web Token (JWT) to be used to subscribe for Location updates for this new Delivery.
+- `googleMapsApiKey`: The API key to be used if rendering maps using Google's engine.
+
+The `googleMapsApiKey` is static so apps do **not** need to handle the scenario that it changes from request to request.
+This means that values received from subsequent calls may be safely ignored, with the app's UI continuing to use
+visual components created using the key received from their first call to this endpoint.
+This key is likely needed for Android apps and will likely be ignored by iOS apps, in preference for using Apple maps.
 
 Example request:
 
@@ -177,7 +184,8 @@ Example response (prettified):
 ```json
 {
   "orderId": 3,
-  "ablyToken": "<SECRET_REDACTED>"
+  "ablyToken": "<SECRET_REDACTED>",
+  "googleMapsApiKey": "<SECRET_REDACTED>"
 }
 ```
 
