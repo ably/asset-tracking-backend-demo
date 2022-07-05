@@ -234,6 +234,23 @@ exports.getGoogleMaps = async (req, res, next) => {
     });
 };
 
+exports.getAbly = async (req, res, next) => {
+  let webToken;
+  try {
+    webToken = createWebToken();
+  } catch (error) {
+    next(error); // intentionally a 500 Internal Server Error
+    return;
+  }
+
+  // Success
+  res
+    .status(STATUS_CODE_OK)
+    .send({
+      token: webToken,
+    });
+};
+
 function assertNumber(value) {
   const type = typeof value;
   if (type !== 'number') {

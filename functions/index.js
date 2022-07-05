@@ -18,6 +18,7 @@ const {
   assignOrder,
   deleteOrder,
   getGoogleMaps,
+  getAbly,
 } = require('./Handlers');
 
 const { logger } = functions;
@@ -94,6 +95,7 @@ app.post('/orders/', createOrder);
 app.put('/orders/:orderId', assignOrder);
 app.delete('/orders/:orderId', deleteOrder);
 app.get('/googleMaps', getGoogleMaps);
+app.get('/ably', getAbly);
 
 // Our custom error handler, which must be defined here, after other app.use() and routes calls.
 app.use(errorHandlingMiddleware);

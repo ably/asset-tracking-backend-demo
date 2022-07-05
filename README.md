@@ -194,6 +194,8 @@ Example response (prettified):
 }
 ```
 
+See also: [Ably Token](#ably-token)
+
 ### Assign Order
 
 `PUT /orders/<orderId>`
@@ -252,6 +254,8 @@ calls to this endpoint by the same rider for the same order will observe an addi
 of `riderUsername` - this is expected behaviour, being a side effect of the simplistic implementation of this demo
 backend service.
 
+See also: [Ably Token](#ably-token)
+
 ### Delete Order
 
 `DELETE /orders/<orderId>`
@@ -297,6 +301,30 @@ Example response (prettified):
 
 This same, static key is also returned in responses from the [Create Order](#create-order) endpoint.
 
+### Get Ably
+
+Used by both the Rider app and the Customer app to request a new authentication token for use with the Ably service.
+
+Successful response status code: `200` OK
+
+Example request:
+
+```bash
+curl --verbose \
+  https://<firebase-region>-<firebase-project-name>.cloudfunctions.net/deliveryService/ably \
+  --user "username:password"
+```
+
+Example response (prettified):
+
+```json
+{
+  "token": "<SECRET_REDACTED>"
+}
+```
+
+See also: [Ably Token](#ably-token)
+
 ## REST API Error Responses
 
 Service errors, in common with success responses, are returned with content type `application/json`,
@@ -332,3 +360,10 @@ Example response (prettified):
 | ----- | ---- | ----------- |
 | `latitude` | number | **Required** - Must be a value between `-90.0` and `90.0`. |
 | `longitude` | number | **Required** - Must be a value between `-180.0` and `180.0`. |
+
+## Ably Token
+
+Issued with:
+
+- a TTL (time-to-live) of 1 hour (3,600 seconds)
+- [capability](https://ably.com/docs/core-features/authentication#capability-operations) to `subscribe` and `publish` to all channels (`*`)
