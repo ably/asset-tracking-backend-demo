@@ -219,7 +219,7 @@ Example response (prettified):
     "longitude": 4,
     "latitude": 3
   },
-  "customerUsername": "quintin",
+  "customerUsername": "<SECRET_REDACTED>",
   "from": {
     "longitude":2,
     "latitude":1
