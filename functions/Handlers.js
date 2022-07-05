@@ -140,10 +140,7 @@ exports.assignOrder = async (req, res, next) => {
   const { MAPBOX_ACCESS_TOKEN } = process.env;
   try {
     webToken = createWebToken();
-
-    if (!MAPBOX_ACCESS_TOKEN) {
-      throw new Error('Environment variable for Mapbox access token not found.');
-    }
+    assertMapboxAccessToken(MAPBOX_ACCESS_TOKEN);
   } catch (error) {
     next(error); // intentionally a 500 Internal Server Error
     return;
@@ -234,6 +231,23 @@ exports.getGoogleMaps = async (req, res, next) => {
     });
 };
 
+exports.getMapbox = async (req, res, next) => {
+  const { MAPBOX_ACCESS_TOKEN } = process.env;
+  try {
+    assertMapboxAccessToken(MAPBOX_ACCESS_TOKEN);
+  } catch (error) {
+    next(error); // intentionally a 500 Internal Server Error
+    return;
+  }
+
+  // Success
+  res
+    .status(STATUS_CODE_OK)
+    .send({
+      token: MAPBOX_ACCESS_TOKEN,
+    });
+};
+
 exports.getAbly = async (req, res, next) => {
   let webToken;
   try {
@@ -312,5 +326,11 @@ function createWebToken(clientId) {
 function assertGoogleMapsApiKey(value) {
   if (!value) {
     throw new Error('Environment variable for Google Maps API key not found.');
+  }
+}
+
+function assertMapboxAccessToken(value) {
+  if (!value) {
+    throw new Error('Environment variable for Mapbox access token not found.');
   }
 }

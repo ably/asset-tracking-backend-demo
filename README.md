@@ -215,7 +215,8 @@ Response properties:
 
 The `mapbox.token` is static so apps do **not** need to handle the scenario that it changes from request to request.
 This means that an Ably Asset Tracking SDK publisher instance may be created using the token received from the
-first call to this endpoint, with the token value received from subsequent calls safely ignored.
+first call to this endpoint or the [Get Mapbox](#get-mapbox) endpoint, with the token value received from subsequent
+calls to this endpoint safely ignored.
 
 Example request:
 
@@ -300,6 +301,33 @@ Example response (prettified):
 ```
 
 This same, static key is also returned in responses from the [Create Order](#create-order) endpoint.
+
+### Get Mapbox
+
+`GET /mapbox`
+
+May be used by the Rider app to obtain the access token for use with Mapbox, typically in advance of calls to any
+other endpoint.
+
+Successful response status code: `200` OK
+
+Example request:
+
+```bash
+curl --verbose \
+  https://<firebase-region>-<firebase-project-name>.cloudfunctions.net/deliveryService/mapbox \
+  --user "username:password"
+```
+
+Example response (prettified):
+
+```json
+{
+  "token": "<SECRET_REDACTED>"
+}
+```
+
+This same, static key is also returned in responses from the [Assign Order](#assign-order) endpoint.
 
 ### Get Ably
 
