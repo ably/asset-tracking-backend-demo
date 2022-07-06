@@ -99,6 +99,33 @@ is a [Node.js](https://nodejs.org/) application using [npm](https://www.npmjs.co
 This means that the `npm` commands should be utilised within that folder,
 while `firebase` commands are generally used from root (though they do work from here too).
 
+### Creating Users
+
+All endpoints presented by this demo backend service require [HTTP Basic authentication](https://developer.mozilla.org/en-US/docs/Web/HTTP/Authentication#basic_authentication_scheme).
+
+Credentials - `user-id` (username) and `user-pass` (password) - are validated from records in the Firestore database.
+There must be a document per user in the the root `users` collection, which can be navigated to in the Firebase Console view of the Firebase project's Cloud Firestore.
+The `users` collection in the Console can be found at:
+
+    https://console.firebase.google.com/project/<firebase-project-name>/firestore/data/~2Fusers
+
+Or if you've got a new Firebase project, for which the Firestore database exists but you've not yet created the `users` root collection, then visit here to do that:
+
+    https://console.firebase.google.com/project/<firebase-project-name>/firestore/data/~2F
+
+For each user document in the `users` collection:
+
+- The Document ID is the `user-id` (username)
+- The document contents must consist of at least the following fields, both with type of `string`:
+  | Field Name | Field Value |
+  | ---------- | ----------- |
+  | `password` | The `user-pass` (password), in plain text (for simplicity). |
+  | `type` | Either '`rider`' or '`customer`'. |
+
+For example, here's the Firebase Console view of the document for a user with `user-id` '`username`' and `user-pass` '`password`':
+
+![Firestore User Document Example](/resources/images/firestore-user.png)
+
 ### Testing with the Local Emulator
 
 The following command builds the functions and serves them locally:
