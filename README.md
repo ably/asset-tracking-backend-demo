@@ -83,6 +83,26 @@ we've conformed naming of secrets in the three locations you'll find them, that 
 | `MAPBOX_ACCESS_TOKEN` | Returned to Rider apps in [Assign Order](#assign-order) responses. |
 | `GOOGLE_MAPS_API_KEY` | Returned to Customer apps in [Create Order](#create-order) responses. |
 
+### Ably API Key Capabilities
+
+`ABLY_API_KEY_RIDERS` must have been created with the following capabilities:
+
+- **Publish** - publish messages to channels
+- **Subscribe** - subscribe to receive messages and presence state changes on channels
+
+`ABLY_API_KEY_CUSTOMERS` must have been created with the following capabilities:
+
+- **Publish** - publish messages to channels
+- **Subscribe** - subscribe to receive messages and presence state changes on channels
+- **History** - retrieve message and presence state history on channels
+- **Presence** - register presence on a channel (enter, update and leave)
+
+It is recommended, for best practice in respect of security architecture, to:
+
+- restrict each key to just the set of capabilities detailed above for it
+- resource restrict each key to only be able to access channels (not queues)
+- consider enabling [revocable tokens](https://ably.com/docs/core-features/authentication#token-revocation)
+
 ## Deployment
 
 The following command builds the functions and pushes them out to Firebase:
