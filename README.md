@@ -450,3 +450,4 @@ Issued with:
 
 - a TTL (time-to-live) of 1 hour (3,600 seconds)
 - [capability](https://ably.com/docs/core-features/authentication#capability-operations) to `subscribe` and `publish` to all channels (`*`)
+- client identifier (`x-ably-clientId`) set to the `user-id` (username) of the authenticated user calling the endpoint which returned the token

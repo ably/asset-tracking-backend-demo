@@ -48,6 +48,7 @@ exports.createOrder = async (req, res, next) => {
     throw e;
   }
 
+  const { username } = res.locals;
   const singletonDocumentReference = firestore.collection('globals').doc('orders');
   const orderId = await firestore.runTransaction(async (transaction) => {
     // Transaction Step 1: Read
@@ -62,7 +63,7 @@ exports.createOrder = async (req, res, next) => {
     // Transaction Step 3: Make Changes
     transaction.set(singletonDocumentReference, { nextId: id + 1 });
     transaction.create(firestore.collection(COLLECTION_NAME_ORDERS).doc(id.toString()), {
-      customerUsername: res.locals.username,
+      customerUsername: username,
       from,
       to,
     });
@@ -74,7 +75,7 @@ exports.createOrder = async (req, res, next) => {
   let webToken;
   const { GOOGLE_MAPS_API_KEY } = process.env;
   try {
-    webToken = createWebToken(ablyApiKeyForCustomers);
+    webToken = createWebToken(ablyApiKeyForCustomers, username);
     assertGoogleMapsApiKey(GOOGLE_MAPS_API_KEY);
   } catch (error) {
     next(error); // intentionally a 500 Internal Server Error
@@ -148,7 +149,7 @@ exports.assignOrder = async (req, res, next) => {
   let webToken;
   const { MAPBOX_ACCESS_TOKEN } = process.env;
   try {
-    webToken = createWebToken(ablyApiKeyForRiders);
+    webToken = createWebToken(ablyApiKeyForRiders, username);
     assertMapboxAccessToken(MAPBOX_ACCESS_TOKEN);
   } catch (error) {
     next(error); // intentionally a 500 Internal Server Error
@@ -275,7 +276,7 @@ exports.getAbly = async (req, res, next) => {
 
   let webToken;
   try {
-    webToken = createWebToken(apiKey);
+    webToken = createWebToken(apiKey, res.locals.username);
   } catch (error) {
     next(error); // intentionally a 500 Internal Server Error
     return;
@@ -322,6 +323,9 @@ function assertLocation(location) {
 function createWebToken(ablyApiKey, clientId) {
   if (!ablyApiKey) {
     throw new Error('Ably API key getter function not supplied.');
+  }
+  if (!clientId) {
+    throw new Error('Client identifier not supplied.');
   }
 
   const keyParts = ablyApiKey().split(':', 2);
