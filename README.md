@@ -78,7 +78,8 @@ we've conformed naming of secrets in the three locations you'll find them, that 
 
 | Secret Name | Description |
 | ----------- | ----------- |
-| `ABLY_API_KEY` | Used to sign JSON web tokens returned by this service. |
+| `ABLY_API_KEY_RIDERS` | Used to sign JSON web tokens returned to `rider` users by this service. |
+| `ABLY_API_KEY_CUSTOMERS` | Used to sign JSON web tokens returned to `customer` users by this service. |
 | `MAPBOX_ACCESS_TOKEN` | Returned to Rider apps in [Assign Order](#assign-order) responses. |
 | `GOOGLE_MAPS_API_KEY` | Returned to Customer apps in [Create Order](#create-order) responses. |
 

@@ -21,6 +21,15 @@ class RequestError extends Error {
 
 const COLLECTION_NAME_ORDERS = 'orders';
 
+const checkAblyApiKey = (key) => {
+  if (typeof key !== 'string') {
+    throw new Error('Environment variable for Ably API key not found.');
+  }
+  return key;
+};
+const ablyApiKeyForRiders = () => checkAblyApiKey(process.env.ABLY_API_KEY_RIDERS);
+const ablyApiKeyForCustomers = () => checkAblyApiKey(process.env.ABLY_API_KEY_CUSTOMERS);
+
 exports.createOrder = async (req, res, next) => {
   if (res.locals.userType !== USER_TYPE_CUSTOMER) {
     fail(res, STATUS_CODE_UNAUTHORIZED, 'This API is only for Customer use.');
@@ -65,7 +74,7 @@ exports.createOrder = async (req, res, next) => {
   let webToken;
   const { GOOGLE_MAPS_API_KEY } = process.env;
   try {
-    webToken = createWebToken();
+    webToken = createWebToken(ablyApiKeyForCustomers);
     assertGoogleMapsApiKey(GOOGLE_MAPS_API_KEY);
   } catch (error) {
     next(error); // intentionally a 500 Internal Server Error
@@ -139,7 +148,7 @@ exports.assignOrder = async (req, res, next) => {
   let webToken;
   const { MAPBOX_ACCESS_TOKEN } = process.env;
   try {
-    webToken = createWebToken();
+    webToken = createWebToken(ablyApiKeyForRiders);
     assertMapboxAccessToken(MAPBOX_ACCESS_TOKEN);
   } catch (error) {
     next(error); // intentionally a 500 Internal Server Error
@@ -249,9 +258,24 @@ exports.getMapbox = async (req, res, next) => {
 };
 
 exports.getAbly = async (req, res, next) => {
+  let apiKey;
+  switch (res.locals.userType) {
+    case USER_TYPE_CUSTOMER:
+      apiKey = ablyApiKeyForCustomers;
+      break;
+
+    case USER_TYPE_RIDER:
+      apiKey = ablyApiKeyForRiders;
+      break;
+
+    default:
+      fail(res, STATUS_CODE_UNAUTHORIZED);
+      return;
+  }
+
   let webToken;
   try {
-    webToken = createWebToken();
+    webToken = createWebToken(apiKey);
   } catch (error) {
     next(error); // intentionally a 500 Internal Server Error
     return;
@@ -295,13 +319,12 @@ function assertLocation(location) {
   assertLongitude(location.longitude);
 }
 
-function createWebToken(clientId) {
-  const { ABLY_API_KEY } = process.env;
-  if (typeof ABLY_API_KEY !== 'string') {
-    throw new Error('Environment variable for Ably API key not found.');
+function createWebToken(ablyApiKey, clientId) {
+  if (!ablyApiKey) {
+    throw new Error('Ably API key getter function not supplied.');
   }
 
-  const keyParts = ABLY_API_KEY.split(':', 2);
+  const keyParts = ablyApiKey().split(':', 2);
   if (keyParts.length !== 2) {
     throw new Error('Ably API key did not split into exactly two parts.');
   }
