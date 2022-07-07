@@ -20,6 +20,8 @@ class RequestError extends Error {
 }
 
 const COLLECTION_NAME_ORDERS = 'orders';
+const CUSTOMER_CAPABILITIES = ['publish', 'subscribe', 'history', 'presence'];
+const RIDER_CAPABILITIES = ['publish', 'subscribe'];
 
 const checkAblyApiKey = (key) => {
   if (typeof key !== 'string') {
@@ -72,10 +74,20 @@ exports.createOrder = async (req, res, next) => {
     return id;
   });
 
+  const orderIds = await queryAssignedOrders('customerUsername', username);
+  if (!orderIds.includes(orderId)) {
+    orderIds.push(orderId);
+  }
+
   let webToken;
   const { GOOGLE_MAPS_API_KEY } = process.env;
   try {
-    webToken = createWebToken(ablyApiKeyForCustomers, username);
+    webToken = createWebToken(
+      ablyApiKeyForCustomers,
+      username,
+      orderIds,
+      CUSTOMER_CAPABILITIES,
+    );
     assertGoogleMapsApiKey(GOOGLE_MAPS_API_KEY);
   } catch (error) {
     next(error); // intentionally a 500 Internal Server Error
@@ -146,10 +158,20 @@ exports.assignOrder = async (req, res, next) => {
     return;
   }
 
+  const orderIds = await queryAssignedOrders('riderUsername', username);
+  if (!orderIds.includes(orderId)) {
+    orderIds.push(orderId);
+  }
+
   let webToken;
   const { MAPBOX_ACCESS_TOKEN } = process.env;
   try {
-    webToken = createWebToken(ablyApiKeyForRiders, username);
+    webToken = createWebToken(
+      ablyApiKeyForRiders,
+      username,
+      orderIds,
+      RIDER_CAPABILITIES,
+    );
     assertMapboxAccessToken(MAPBOX_ACCESS_TOKEN);
   } catch (error) {
     next(error); // intentionally a 500 Internal Server Error
@@ -260,13 +282,19 @@ exports.getMapbox = async (req, res, next) => {
 
 exports.getAbly = async (req, res, next) => {
   let apiKey;
+  let fieldName;
+  let capabilities;
   switch (res.locals.userType) {
     case USER_TYPE_CUSTOMER:
       apiKey = ablyApiKeyForCustomers;
+      fieldName = 'customerUsername';
+      capabilities = CUSTOMER_CAPABILITIES;
       break;
 
     case USER_TYPE_RIDER:
       apiKey = ablyApiKeyForRiders;
+      fieldName = 'riderUsername';
+      capabilities = RIDER_CAPABILITIES;
       break;
 
     default:
@@ -274,9 +302,17 @@ exports.getAbly = async (req, res, next) => {
       return;
   }
 
+  const { username } = res.locals;
+  const orderIds = await queryAssignedOrders(fieldName, username);
+
   let webToken;
   try {
-    webToken = createWebToken(apiKey, res.locals.username);
+    webToken = createWebToken(
+      apiKey,
+      username,
+      orderIds,
+      capabilities,
+    );
   } catch (error) {
     next(error); // intentionally a 500 Internal Server Error
     return;
@@ -320,12 +356,18 @@ function assertLocation(location) {
   assertLongitude(location.longitude);
 }
 
-function createWebToken(ablyApiKey, clientId) {
+function createWebToken(ablyApiKey, clientId, orderIds, capabilities) {
   if (!ablyApiKey) {
     throw new Error('Ably API key getter function not supplied.');
   }
   if (!clientId) {
     throw new Error('Client identifier not supplied.');
+  }
+  if (!Array.isArray(orderIds)) {
+    throw new Error('orderIds must be an array of strings.');
+  }
+  if (!Array.isArray(capabilities)) {
+    throw new Error('capabilities must be an array of strings.');
   }
 
   const keyParts = ablyApiKey().split(':', 2);
@@ -337,8 +379,13 @@ function createWebToken(ablyApiKey, clientId) {
   const keySecret = keyParts[1];
   const ttlSeconds = 3600;
 
+  const capabilitiesMap = {};
+  orderIds.forEach((orderId) => {
+    capabilitiesMap[`tracking:${orderId}`] = capabilities;
+  });
+
   const payload = {
-    'x-ably-capability': JSON.stringify({ '*': ['publish', 'subscribe'] }),
+    'x-ably-capability': JSON.stringify(capabilitiesMap),
     'x-ably-clientId': clientId,
   };
 
@@ -360,4 +407,17 @@ function assertMapboxAccessToken(value) {
   if (!value) {
     throw new Error('Environment variable for Mapbox access token not found.');
   }
+}
+
+async function queryAssignedOrders(fieldName, username) {
+  const querySnapshot = await firestore.collection(COLLECTION_NAME_ORDERS).where(fieldName, '==', username).get();
+  if (querySnapshot.empty) {
+    return [];
+  }
+
+  const orderIds = [];
+  querySnapshot.forEach((documentSnapshot) => {
+    orderIds.push(documentSnapshot.id);
+  });
+  return orderIds;
 }

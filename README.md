@@ -103,6 +103,8 @@ It is recommended, for best practice in respect of security architecture, to:
 - resource restrict each key to only be able to access channels (not queues)
 - consider enabling [revocable tokens](https://ably.com/docs/core-features/authentication#token-revocation)
 
+See [Ably Token](#ably-token) for details of the capabilities given to tokens signed by this service with these keys.
+
 ## Deployment
 
 The following command builds the functions and pushes them out to Firebase:
@@ -449,5 +451,11 @@ Example response (prettified):
 Issued with:
 
 - a TTL (time-to-live) of 1 hour (3,600 seconds)
-- [capability](https://ably.com/docs/core-features/authentication#capability-operations) to `subscribe` and `publish` to all channels (`*`)
+- [capability](https://ably.com/docs/core-features/authentication#capability-operations):
+  - granted for just the Ably [channels](https://ably.com/docs/realtime/channels) for orders which the authenticated user calling the endpoint needs to interact - where those channel names have the `tracking:` [channel namespace](https://ably.com/docs/realtime/channels#channel-namespaces) followed by the order identifier
+  - depending on the type of the authenticated user calling the endpoint which returned the token:
+    - **Rider**: `subscribe` and `publish`
+    - **Customer**: `subscribe`, `publish`, `history` and `presence`
 - client identifier (`x-ably-clientId`) set to the `user-id` (username) of the authenticated user calling the endpoint which returned the token
+
+See [Ably API Key Capabilities](#ably-api-key-capabilities), for signing key requirements.
