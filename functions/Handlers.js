@@ -24,6 +24,7 @@ class RequestError extends Error {
 const COLLECTION_NAME_ORDERS = 'orders';
 const CUSTOMER_CAPABILITIES = ['publish', 'subscribe', 'history', 'presence'];
 const RIDER_CAPABILITIES = ['publish', 'subscribe'];
+const MAXIMUM_ABLY_TOKEN_TTL = 3600; // seconds
 
 const getEnvVar = (name) => {
   const value = process.env[name];
@@ -31,6 +32,21 @@ const getEnvVar = (name) => {
     throw new Error(`Environment variable ${name} not found.`);
   }
   return value;
+};
+
+const isAblyTokenTtlOutOfRange = (seconds) => (seconds < 1 || seconds > MAXIMUM_ABLY_TOKEN_TTL);
+
+const getAblyTokenTtl = (req) => {
+  const name = 'ably-token-ttl';
+  const value = req.get(name);
+  if (value === undefined) {
+    return MAXIMUM_ABLY_TOKEN_TTL;
+  }
+  const seconds = parseInt(value, 10);
+  if (isAblyTokenTtlOutOfRange(seconds)) {
+    throw new Error(`The value specified in the '${name}' request header is out of range.`);
+  }
+  return seconds;
 };
 
 exports.createOrder = async (req, res, next) => {
@@ -89,6 +105,7 @@ exports.createOrder = async (req, res, next) => {
       username,
       orderIds,
       CUSTOMER_CAPABILITIES,
+      getAblyTokenTtl(req),
     );
     assertGoogleMapsApiKey(GOOGLE_MAPS_API_KEY);
   } catch (error) {
@@ -175,6 +192,7 @@ exports.assignOrder = async (req, res, next) => {
       username,
       orderIds,
       RIDER_CAPABILITIES,
+      getAblyTokenTtl(req),
     );
     assertMapboxAccessToken(MAPBOX_ACCESS_TOKEN);
   } catch (error) {
@@ -316,6 +334,7 @@ exports.getAbly = async (req, res, next) => {
       username,
       orderIds,
       capabilities,
+      getAblyTokenTtl(req),
     );
   } catch (error) {
     next(error); // intentionally a 500 Internal Server Error
@@ -360,7 +379,7 @@ function assertLocation(location) {
   assertLongitude(location.longitude);
 }
 
-function createWebToken(ablyApiKey, clientId, orderIds, capabilities) {
+function createWebToken(ablyApiKey, clientId, orderIds, capabilities, ttlSeconds) {
   if (!ablyApiKey) {
     throw new Error('Ably API key not supplied.');
   }
@@ -373,6 +392,9 @@ function createWebToken(ablyApiKey, clientId, orderIds, capabilities) {
   if (!Array.isArray(capabilities)) {
     throw new Error('capabilities must be an array of strings.');
   }
+  if (isAblyTokenTtlOutOfRange(ttlSeconds)) {
+    throw new Error('TTL is out of range.');
+  }
 
   const keyParts = ablyApiKey.split(':', 2);
   if (keyParts.length !== 2) {
@@ -381,7 +403,6 @@ function createWebToken(ablyApiKey, clientId, orderIds, capabilities) {
 
   const keyName = keyParts[0];
   const keySecret = keyParts[1];
-  const ttlSeconds = 3600;
 
   const capabilitiesMap = {};
   orderIds.forEach((orderId) => {
