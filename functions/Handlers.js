@@ -22,17 +22,19 @@ class RequestError extends Error {
 const COLLECTION_NAME_ORDERS = 'orders';
 const CUSTOMER_CAPABILITIES = ['publish', 'subscribe', 'history', 'presence'];
 const RIDER_CAPABILITIES = ['publish', 'subscribe'];
+const ABLY_API_KEY_RIDERS = 'ABLY_API_KEY_RIDERS';
+const ABLY_API_KEY_CUSTOMERS = 'ABLY_API_KEY_CUSTOMERS';
 
-const checkAblyApiKey = (key) => {
-  if (typeof key !== 'string') {
-    throw new Error('Environment variable for Ably API key not found.');
+const getEnvVar = (name) => {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`Environment variable ${name} not found.`);
   }
-  return key;
+  return value;
 };
-const ablyApiKeyForRiders = () => checkAblyApiKey(process.env.ABLY_API_KEY_RIDERS);
-const ablyApiKeyForCustomers = () => checkAblyApiKey(process.env.ABLY_API_KEY_CUSTOMERS);
 
 exports.createOrder = async (req, res, next) => {
+  const customersApiKey = getEnvVar(ABLY_API_KEY_CUSTOMERS);
   if (res.locals.userType !== USER_TYPE_CUSTOMER) {
     fail(res, STATUS_CODE_UNAUTHORIZED, 'This API is only for Customer use.');
     return;
@@ -83,7 +85,7 @@ exports.createOrder = async (req, res, next) => {
   const { GOOGLE_MAPS_API_KEY } = process.env;
   try {
     webToken = createWebToken(
-      ablyApiKeyForCustomers,
+      customersApiKey,
       username,
       orderIds,
       CUSTOMER_CAPABILITIES,
@@ -109,6 +111,8 @@ exports.createOrder = async (req, res, next) => {
 };
 
 exports.assignOrder = async (req, res, next) => {
+  const ridersApiKey = getEnvVar(ABLY_API_KEY_RIDERS);
+
   if (res.locals.userType !== USER_TYPE_RIDER) {
     fail(res, STATUS_CODE_UNAUTHORIZED, 'This API is only for Rider use.');
     return;
@@ -167,7 +171,7 @@ exports.assignOrder = async (req, res, next) => {
   const { MAPBOX_ACCESS_TOKEN } = process.env;
   try {
     webToken = createWebToken(
-      ablyApiKeyForRiders,
+      ridersApiKey,
       username,
       orderIds,
       RIDER_CAPABILITIES,
@@ -286,13 +290,13 @@ exports.getAbly = async (req, res, next) => {
   let capabilities;
   switch (res.locals.userType) {
     case USER_TYPE_CUSTOMER:
-      apiKey = ablyApiKeyForCustomers;
+      apiKey = getEnvVar(ABLY_API_KEY_CUSTOMERS);
       fieldName = 'customerUsername';
       capabilities = CUSTOMER_CAPABILITIES;
       break;
 
     case USER_TYPE_RIDER:
-      apiKey = ablyApiKeyForRiders;
+      apiKey = getEnvVar(ABLY_API_KEY_RIDERS);
       fieldName = 'riderUsername';
       capabilities = RIDER_CAPABILITIES;
       break;
@@ -358,7 +362,7 @@ function assertLocation(location) {
 
 function createWebToken(ablyApiKey, clientId, orderIds, capabilities) {
   if (!ablyApiKey) {
-    throw new Error('Ably API key getter function not supplied.');
+    throw new Error('Ably API key not supplied.');
   }
   if (!clientId) {
     throw new Error('Client identifier not supplied.');
@@ -370,7 +374,7 @@ function createWebToken(ablyApiKey, clientId, orderIds, capabilities) {
     throw new Error('capabilities must be an array of strings.');
   }
 
-  const keyParts = ablyApiKey().split(':', 2);
+  const keyParts = ablyApiKey.split(':', 2);
   if (keyParts.length !== 2) {
     throw new Error('Ably API key did not split into exactly two parts.');
   }
