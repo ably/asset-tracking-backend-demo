@@ -24,6 +24,13 @@ const {
 
 const { logger } = functions;
 
+const SECRET_NAMES = [
+  'ABLY_API_KEY_RIDERS',
+  'ABLY_API_KEY_CUSTOMERS',
+  'MAPBOX_ACCESS_TOKEN',
+  'GOOGLE_MAPS_API_KEY',
+];
+
 const authorizeMiddleware = async (req, res, next) => {
   const credentials = basicAuth(req);
   if (!credentials) {
@@ -105,5 +112,6 @@ app.use(errorHandlingMiddleware);
 // Expose Express API as a single Cloud Function.
 exports.deliveryService = functions
   .region('europe-west2')
+  .runWith({ secrets: SECRET_NAMES })
   .https
   .onRequest(app);
