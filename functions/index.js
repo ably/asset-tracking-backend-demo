@@ -11,6 +11,8 @@ const {
   isUserType,
   STATUS_CODE_UNAUTHORIZED,
   STATUS_CODE_INTERNAL_SERVER_ERROR,
+  ABLY_API_KEY_CUSTOMERS,
+  ABLY_API_KEY_RIDERS,
 } = require('./common');
 
 const {
@@ -25,8 +27,8 @@ const {
 const { logger } = functions;
 
 const SECRET_NAMES = [
-  'ABLY_API_KEY_RIDERS',
-  'ABLY_API_KEY_CUSTOMERS',
+  ABLY_API_KEY_RIDERS,
+  ABLY_API_KEY_CUSTOMERS,
   'MAPBOX_ACCESS_TOKEN',
   'GOOGLE_MAPS_API_KEY',
 ];
