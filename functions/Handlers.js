@@ -20,8 +20,21 @@ class RequestError extends Error {
 }
 
 const COLLECTION_NAME_ORDERS = 'orders';
+const CUSTOMER_CAPABILITIES = ['publish', 'subscribe', 'history', 'presence'];
+const RIDER_CAPABILITIES = ['publish', 'subscribe'];
+const ABLY_API_KEY_RIDERS = 'ABLY_API_KEY_RIDERS';
+const ABLY_API_KEY_CUSTOMERS = 'ABLY_API_KEY_CUSTOMERS';
+
+const getEnvVar = (name) => {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`Environment variable ${name} not found.`);
+  }
+  return value;
+};
 
 exports.createOrder = async (req, res, next) => {
+  const customersApiKey = getEnvVar(ABLY_API_KEY_CUSTOMERS);
   if (res.locals.userType !== USER_TYPE_CUSTOMER) {
     fail(res, STATUS_CODE_UNAUTHORIZED, 'This API is only for Customer use.');
     return;
@@ -39,6 +52,7 @@ exports.createOrder = async (req, res, next) => {
     throw e;
   }
 
+  const { username } = res.locals;
   const singletonDocumentReference = firestore.collection('globals').doc('orders');
   const orderId = await firestore.runTransaction(async (transaction) => {
     // Transaction Step 1: Read
@@ -53,7 +67,7 @@ exports.createOrder = async (req, res, next) => {
     // Transaction Step 3: Make Changes
     transaction.set(singletonDocumentReference, { nextId: id + 1 });
     transaction.create(firestore.collection(COLLECTION_NAME_ORDERS).doc(id.toString()), {
-      customerUsername: res.locals.username,
+      customerUsername: username,
       from,
       to,
     });
@@ -62,10 +76,20 @@ exports.createOrder = async (req, res, next) => {
     return id;
   });
 
+  const orderIds = await queryAssignedOrders('customerUsername', username);
+  if (!orderIds.includes(orderId)) {
+    orderIds.push(orderId);
+  }
+
   let webToken;
   const { GOOGLE_MAPS_API_KEY } = process.env;
   try {
-    webToken = createWebToken();
+    webToken = createWebToken(
+      customersApiKey,
+      username,
+      orderIds,
+      CUSTOMER_CAPABILITIES,
+    );
     assertGoogleMapsApiKey(GOOGLE_MAPS_API_KEY);
   } catch (error) {
     next(error); // intentionally a 500 Internal Server Error
@@ -87,6 +111,8 @@ exports.createOrder = async (req, res, next) => {
 };
 
 exports.assignOrder = async (req, res, next) => {
+  const ridersApiKey = getEnvVar(ABLY_API_KEY_RIDERS);
+
   if (res.locals.userType !== USER_TYPE_RIDER) {
     fail(res, STATUS_CODE_UNAUTHORIZED, 'This API is only for Rider use.');
     return;
@@ -136,10 +162,20 @@ exports.assignOrder = async (req, res, next) => {
     return;
   }
 
+  const orderIds = await queryAssignedOrders('riderUsername', username);
+  if (!orderIds.includes(orderId)) {
+    orderIds.push(orderId);
+  }
+
   let webToken;
   const { MAPBOX_ACCESS_TOKEN } = process.env;
   try {
-    webToken = createWebToken();
+    webToken = createWebToken(
+      ridersApiKey,
+      username,
+      orderIds,
+      RIDER_CAPABILITIES,
+    );
     assertMapboxAccessToken(MAPBOX_ACCESS_TOKEN);
   } catch (error) {
     next(error); // intentionally a 500 Internal Server Error
@@ -249,9 +285,38 @@ exports.getMapbox = async (req, res, next) => {
 };
 
 exports.getAbly = async (req, res, next) => {
+  let apiKey;
+  let fieldName;
+  let capabilities;
+  switch (res.locals.userType) {
+    case USER_TYPE_CUSTOMER:
+      apiKey = getEnvVar(ABLY_API_KEY_CUSTOMERS);
+      fieldName = 'customerUsername';
+      capabilities = CUSTOMER_CAPABILITIES;
+      break;
+
+    case USER_TYPE_RIDER:
+      apiKey = getEnvVar(ABLY_API_KEY_RIDERS);
+      fieldName = 'riderUsername';
+      capabilities = RIDER_CAPABILITIES;
+      break;
+
+    default:
+      fail(res, STATUS_CODE_UNAUTHORIZED);
+      return;
+  }
+
+  const { username } = res.locals;
+  const orderIds = await queryAssignedOrders(fieldName, username);
+
   let webToken;
   try {
-    webToken = createWebToken();
+    webToken = createWebToken(
+      apiKey,
+      username,
+      orderIds,
+      capabilities,
+    );
   } catch (error) {
     next(error); // intentionally a 500 Internal Server Error
     return;
@@ -295,13 +360,21 @@ function assertLocation(location) {
   assertLongitude(location.longitude);
 }
 
-function createWebToken(clientId) {
-  const { ABLY_API_KEY } = process.env;
-  if (typeof ABLY_API_KEY !== 'string') {
-    throw new Error('Environment variable for Ably API key not found.');
+function createWebToken(ablyApiKey, clientId, orderIds, capabilities) {
+  if (!ablyApiKey) {
+    throw new Error('Ably API key not supplied.');
+  }
+  if (!clientId) {
+    throw new Error('Client identifier not supplied.');
+  }
+  if (!Array.isArray(orderIds)) {
+    throw new Error('orderIds must be an array of strings.');
+  }
+  if (!Array.isArray(capabilities)) {
+    throw new Error('capabilities must be an array of strings.');
   }
 
-  const keyParts = ABLY_API_KEY.split(':', 2);
+  const keyParts = ablyApiKey.split(':', 2);
   if (keyParts.length !== 2) {
     throw new Error('Ably API key did not split into exactly two parts.');
   }
@@ -310,8 +383,13 @@ function createWebToken(clientId) {
   const keySecret = keyParts[1];
   const ttlSeconds = 3600;
 
+  const capabilitiesMap = {};
+  orderIds.forEach((orderId) => {
+    capabilitiesMap[`tracking:${orderId}`] = capabilities;
+  });
+
   const payload = {
-    'x-ably-capability': JSON.stringify({ '*': ['publish', 'subscribe'] }),
+    'x-ably-capability': JSON.stringify(capabilitiesMap),
     'x-ably-clientId': clientId,
   };
 
@@ -333,4 +411,17 @@ function assertMapboxAccessToken(value) {
   if (!value) {
     throw new Error('Environment variable for Mapbox access token not found.');
   }
+}
+
+async function queryAssignedOrders(fieldName, username) {
+  const querySnapshot = await firestore.collection(COLLECTION_NAME_ORDERS).where(fieldName, '==', username).get();
+  if (querySnapshot.empty) {
+    return [];
+  }
+
+  const orderIds = [];
+  querySnapshot.forEach((documentSnapshot) => {
+    orderIds.push(documentSnapshot.id);
+  });
+  return orderIds;
 }

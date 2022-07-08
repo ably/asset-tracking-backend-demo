@@ -78,9 +78,32 @@ we've conformed naming of secrets in the three locations you'll find them, that 
 
 | Secret Name | Description |
 | ----------- | ----------- |
-| `ABLY_API_KEY` | Used to sign JSON web tokens returned by this service. |
+| `ABLY_API_KEY_RIDERS` | Used to sign JSON web tokens returned to `rider` users by this service. |
+| `ABLY_API_KEY_CUSTOMERS` | Used to sign JSON web tokens returned to `customer` users by this service. |
 | `MAPBOX_ACCESS_TOKEN` | Returned to Rider apps in [Assign Order](#assign-order) responses. |
 | `GOOGLE_MAPS_API_KEY` | Returned to Customer apps in [Create Order](#create-order) responses. |
+
+### Ably API Key Capabilities
+
+`ABLY_API_KEY_RIDERS` must have been created with the following capabilities:
+
+- **Publish** - publish messages to channels
+- **Subscribe** - subscribe to receive messages and presence state changes on channels
+
+`ABLY_API_KEY_CUSTOMERS` must have been created with the following capabilities:
+
+- **Publish** - publish messages to channels
+- **Subscribe** - subscribe to receive messages and presence state changes on channels
+- **History** - retrieve message and presence state history on channels
+- **Presence** - register presence on a channel (enter, update and leave)
+
+It is recommended, for best practice in respect of security architecture, to:
+
+- restrict each key to just the set of capabilities detailed above for it
+- resource restrict each key to only be able to access channels (not queues)
+- consider enabling [revocable tokens](https://ably.com/docs/core-features/authentication#token-revocation)
+
+See [Ably Token](#ably-token) for details of the capabilities given to tokens signed by this service with these keys.
 
 ## Deployment
 
@@ -428,4 +451,11 @@ Example response (prettified):
 Issued with:
 
 - a TTL (time-to-live) of 1 hour (3,600 seconds)
-- [capability](https://ably.com/docs/core-features/authentication#capability-operations) to `subscribe` and `publish` to all channels (`*`)
+- [capability](https://ably.com/docs/core-features/authentication#capability-operations):
+  - granted for just the Ably [channels](https://ably.com/docs/realtime/channels) for orders which the authenticated user calling the endpoint needs to interact - where those channel names have the `tracking:` [channel namespace](https://ably.com/docs/realtime/channels#channel-namespaces) followed by the order identifier
+  - depending on the type of the authenticated user calling the endpoint which returned the token:
+    - **Rider**: `subscribe` and `publish`
+    - **Customer**: `subscribe`, `publish`, `history` and `presence`
+- client identifier (`x-ably-clientId`) set to the `user-id` (username) of the authenticated user calling the endpoint which returned the token
+
+See [Ably API Key Capabilities](#ably-api-key-capabilities), for signing key requirements.
