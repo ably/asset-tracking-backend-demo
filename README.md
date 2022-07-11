@@ -447,11 +447,34 @@ Example response (prettified):
 | `latitude` | number | **Required** - Must be a value between `-90.0` and `90.0`. |
 | `longitude` | number | **Required** - Must be a value between `-180.0` and `180.0`. |
 
+## HTTP Request Headers
+
+These are:
+
+- accepted by all endpoints
+- here, primarily, to help us QA test the [related demo apps](#related-demos) against this demo backend service
+
+### Ably Token TTL Request Header
+
+Overrides the default time-to-live for returned tokens.
+
+- **Name**: `ably-token-ttl`
+- **Value**: Time to live, in seconds, which may not exceed the maximum (see [Ably Token](#ably-token))
+
+Example request, specifying a TTL of 1 minute (60 seconds):
+
+```bash
+curl --verbose \
+  https://<firebase-region>-<firebase-project-name>.cloudfunctions.net/deliveryService/ably \
+  --user "username:password" \
+  --header "ably-token-ttl: 60"
+```
+
 ## Ably Token
 
 Issued with:
 
-- a TTL (time-to-live) of 1 hour (3,600 seconds)
+- By default, a TTL (time-to-live) of 1 hour (3,600 seconds), which is the maximum duration supported by this service
 - [capability](https://ably.com/docs/core-features/authentication#capability-operations):
   - granted for just the Ably [channels](https://ably.com/docs/realtime/channels) for orders which the authenticated user calling the endpoint needs to interact - where those channel names have the `tracking:` [channel namespace](https://ably.com/docs/realtime/channels#channel-namespaces) followed by the order identifier
   - depending on the type of the authenticated user calling the endpoint which returned the token:
@@ -460,3 +483,6 @@ Issued with:
 - client identifier (`x-ably-clientId`) set to the `user-id` (username) of the authenticated user calling the endpoint which returned the token
 
 See [Ably API Key Capabilities](#ably-api-key-capabilities), for signing key requirements.
+
+See [Ably Token TTL Request Header](#ably-token-ttl-request-header), for details of the HTTP header which clients may send alongside their requests to override the default TTL.
+This is useful for testing purposes.
