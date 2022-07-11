@@ -11,6 +11,8 @@ const {
   STATUS_CODE_CONFLICT,
   STATUS_CODE_NOT_FOUND,
   STATUS_CODE_OK,
+  ABLY_API_KEY_CUSTOMERS,
+  ABLY_API_KEY_RIDERS,
 } = require('./common');
 
 class RequestError extends Error {
@@ -22,8 +24,6 @@ class RequestError extends Error {
 const COLLECTION_NAME_ORDERS = 'orders';
 const CUSTOMER_CAPABILITIES = ['publish', 'subscribe', 'history', 'presence'];
 const RIDER_CAPABILITIES = ['publish', 'subscribe'];
-const ABLY_API_KEY_RIDERS = 'ABLY_API_KEY_RIDERS';
-const ABLY_API_KEY_CUSTOMERS = 'ABLY_API_KEY_CUSTOMERS';
 
 const getEnvVar = (name) => {
   const value = process.env[name];

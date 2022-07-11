@@ -75,6 +75,7 @@ we've conformed naming of secrets in the three locations you'll find them, that 
 1. As secrets [configured via the Firebase CLI](https://firebase.google.com/docs/functions/config-env#create-secret)
 2. As environment variables fed into the Node.js process at runtime
 3. In the source code, populated from `process.env`
+  (also defined as static strings as members of the `SECRET_NAMES` array defined in [`index.js`](functions/index.js))
 
 | Secret Name | Description |
 | ----------- | ----------- |
