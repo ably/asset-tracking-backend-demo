@@ -51,7 +51,7 @@ module.exports.authorizeMiddleware = async (req, res, next) => {
     return;
   }
 
-  logger.info(`Incorrect password supplied for user '${name}'. Received '${pass}', expected '${data.password}'.`);
+  logger.info(`Incorrect password supplied for user '${name}'.`);
   fail(res, STATUS_CODE_UNAUTHORIZED); // intentionally not providing a message as it could assist probing hackers
 };
 
