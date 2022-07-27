@@ -19,6 +19,8 @@ exports.USER_TYPE_RIDER = 'rider';
 exports.ABLY_API_KEY_RIDERS = 'ABLY_API_KEY_RIDERS';
 exports.ABLY_API_KEY_CUSTOMERS = 'ABLY_API_KEY_CUSTOMERS';
 
+exports.HASHING_SECRET = 'HASHING_SECRET';
+
 exports.isUserType = (value) => {
   switch (value) {
     case this.USER_TYPE_CUSTOMER:
