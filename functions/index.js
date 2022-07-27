@@ -10,6 +10,7 @@ const {
   ABLY_API_KEY_CUSTOMERS,
   ABLY_API_KEY_RIDERS,
   HASHING_SECRET,
+  USER_TYPE_ADMIN,
 } = require('./common');
 
 const {
@@ -19,9 +20,13 @@ const {
   getGoogleMaps,
   getMapbox,
   getAbly,
+  createUser,
 } = require('./Handlers');
 
-const { authorizeMiddleware } = require('./auth');
+const {
+  authorizeMiddleware,
+  userIsOfTypeMiddleware,
+} = require('./auth');
 
 const SECRET_NAMES = [
   ABLY_API_KEY_RIDERS,
@@ -60,6 +65,8 @@ app.delete('/orders/:orderId', deleteOrder);
 app.get('/googleMaps', getGoogleMaps);
 app.get('/mapbox', getMapbox);
 app.get('/ably', getAbly);
+
+app.post('/admin/user', createUser, userIsOfTypeMiddleware(USER_TYPE_ADMIN));
 
 // Our custom error handler, which must be defined here, after other app.use() and routes calls.
 app.use(errorHandlingMiddleware);

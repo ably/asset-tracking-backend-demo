@@ -13,7 +13,9 @@ const {
   STATUS_CODE_OK,
   ABLY_API_KEY_CUSTOMERS,
   ABLY_API_KEY_RIDERS,
+  isUserType,
 } = require('./common');
+const { createUserAccount } = require('./auth');
 
 class RequestError extends Error {
   constructor(message = 'Invalid request.', ...args) {
@@ -347,6 +349,16 @@ exports.getAbly = async (req, res, next) => {
     .send({
       token: webToken,
     });
+};
+
+exports.createUser = async (req, res) => {
+  const { username, password, type } = req.body;
+  if (!isUserType(type)) {
+    fail(res, STATUS_CODE_BAD_REQUEST, 'Invalid user type');
+    return;
+  }
+  await createUserAccount(username, password, type);
+  res.status(STATUS_CODE_CREATED).send({ username });
 };
 
 function assertNumber(value) {

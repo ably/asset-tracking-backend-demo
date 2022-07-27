@@ -55,8 +55,28 @@ module.exports.authorizeMiddleware = async (req, res, next) => {
   fail(res, STATUS_CODE_UNAUTHORIZED); // intentionally not providing a message as it could assist probing hackers
 };
 
+module.exports.userIsOfTypeMiddleware = (type) => (req, res, next) => {
+  if (res.locals.userType !== type) {
+    fail(res, STATUS_CODE_UNAUTHORIZED, `This endpoint is only for ${type} use.`);
+    return;
+  }
+  next();
+};
+
 // Compares the input password and salt to the stored SHA256 hash in the user data
 const comparePassword = (input, hashedPassword, salt) => {
   const hashedInput = crypto.createHash('sha256').update(salt + input).digest('hex');
   return hashedInput === hashedPassword;
+};
+
+// Creates a new user account with a specified username, password and userType
+module.exports.createUserAccount = (username, password, userType) => {
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hashedPassword = crypto.createHash('sha256').update(salt + password).digest('hex');
+  return firestore.collection('users').add({
+    username,
+    password: hashedPassword,
+    salt,
+    userType,
+  });
 };
