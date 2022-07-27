@@ -52,7 +52,7 @@ const authorizeMiddleware = async (req, res, next) => {
     // see: https://expressjs.com/en/guide/error-handling.html
     // It's worth noting that, by default, Express serves this as HTML and includes all Error detail.
     // It's also worth noting that this code was written against Express 4, given Express 5 was still in Beta - which
-    // explains why we need to do this error propogation 'by hand'.
+    // explains why we need to do this error propagation 'by hand'.
     next(error);
     return;
   }
