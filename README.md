@@ -77,12 +77,13 @@ we've conformed naming of secrets in the three locations you'll find them, that 
 3. In the source code, populated from `process.env`
   (also defined as static strings as members of the `SECRET_NAMES` array defined in [`index.js`](functions/index.js))
 
-| Secret Name | Description |
-| ----------- | ----------- |
-| `ABLY_API_KEY_RIDERS` | Used to sign JSON web tokens returned to `rider` users by this service. |
-| `ABLY_API_KEY_CUSTOMERS` | Used to sign JSON web tokens returned to `customer` users by this service. |
-| `MAPBOX_ACCESS_TOKEN` | Returned to Rider apps in [Assign Order](#assign-order) responses. |
-| `GOOGLE_MAPS_API_KEY` | Returned to Customer apps in [Create Order](#create-order) responses. |
+| Secret Name              | Description                                                                                           |
+|--------------------------|-------------------------------------------------------------------------------------------------------|
+| `ABLY_API_KEY_RIDERS`    | Used to sign JSON web tokens returned to `rider` users by this service.                               |
+| `ABLY_API_KEY_CUSTOMERS` | Used to sign JSON web tokens returned to `customer` users by this service.                            |
+| `MAPBOX_ACCESS_TOKEN`    | Returned to Rider apps in [Assign Order](#assign-order) responses.                                    |
+| `GOOGLE_MAPS_API_KEY`    | Returned to Customer apps in [Create Order](#create-order) responses.                                 |
+| `INITIAL_USER_PASSWORD`  | Creates an initial `admin` user with this password, used for creating `rider` and `customer` accounts |
 
 ### Ably API Key Capabilities
 
