@@ -20,7 +20,7 @@ exports.USER_TYPE_ADMIN = 'admin';
 exports.ABLY_API_KEY_RIDERS = 'ABLY_API_KEY_RIDERS';
 exports.ABLY_API_KEY_CUSTOMERS = 'ABLY_API_KEY_CUSTOMERS';
 
-exports.HASHING_SECRET = 'HASHING_SECRET';
+exports.INITIAL_USER_PASSWORD = 'INITIAL_USER_PASSWORD';
 
 exports.isUserType = (value) => {
   switch (value) {

@@ -6,6 +6,8 @@ const {
   STATUS_CODE_UNAUTHORIZED,
   firestore,
   isUserType,
+  USER_TYPE_ADMIN,
+  INITIAL_USER_PASSWORD,
 } = require('./common');
 
 const { logger } = functions;
@@ -70,13 +72,27 @@ const comparePassword = (input, hashedPassword, salt) => {
 };
 
 // Creates a new user account with a specified username, password and userType
-module.exports.createUserAccount = (username, password, userType) => {
+module.exports.createUserAccount = (username, password, type) => {
   const salt = crypto.randomBytes(16).toString('hex');
   const hashedPassword = crypto.createHash('sha256').update(salt + password).digest('hex');
-  return firestore.collection('users').add({
-    username,
+  return firestore.collection('users').doc(username).set({
     password: hashedPassword,
     salt,
-    userType,
+    type,
   });
+};
+
+module.exports.createInitialUser = async () => {
+  // Check if an initial user password is set, if not ignore the setup
+  if (!process.env[INITIAL_USER_PASSWORD]) {
+    logger.info(`Not creating an initial user as ${INITIAL_USER_PASSWORD} is not set`);
+    return;
+  }
+  const { exists } = await firestore.collection('users').doc('admin').get();
+  // Do not create the initial user if it exists
+  if (exists) {
+    return;
+  }
+  await this.createUserAccount('admin', process.env[INITIAL_USER_PASSWORD], USER_TYPE_ADMIN);
+  logger.info(`Initial admin account has been created. Use username "admin" and the value of ${INITIAL_USER_PASSWORD} to login.`);
 };

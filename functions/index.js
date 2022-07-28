@@ -9,8 +9,8 @@ const {
   STATUS_CODE_INTERNAL_SERVER_ERROR,
   ABLY_API_KEY_CUSTOMERS,
   ABLY_API_KEY_RIDERS,
-  HASHING_SECRET,
   USER_TYPE_ADMIN,
+  INITIAL_USER_PASSWORD,
 } = require('./common');
 
 const {
@@ -24,6 +24,7 @@ const {
 } = require('./Handlers');
 
 const {
+  createInitialUser,
   authorizeMiddleware,
   userIsOfTypeMiddleware,
 } = require('./auth');
@@ -31,7 +32,7 @@ const {
 const SECRET_NAMES = [
   ABLY_API_KEY_RIDERS,
   ABLY_API_KEY_CUSTOMERS,
-  HASHING_SECRET,
+  INITIAL_USER_PASSWORD,
   'MAPBOX_ACCESS_TOKEN',
   'GOOGLE_MAPS_API_KEY',
 ];
@@ -45,6 +46,9 @@ const errorHandlingMiddleware = (err, req, res, next) => {
   }
   fail(res, STATUS_CODE_INTERNAL_SERVER_ERROR, err.message);
 };
+
+// Create the initial user account (if it doesn't exist)
+createInitialUser();
 
 const app = express();
 
