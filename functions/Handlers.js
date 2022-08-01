@@ -23,7 +23,7 @@ class RequestError extends Error {
 
 const COLLECTION_NAME_ORDERS = 'orders';
 const CUSTOMER_CAPABILITIES = ['publish', 'subscribe', 'history', 'presence'];
-const RIDER_CAPABILITIES = ['publish', 'subscribe'];
+const RIDER_CAPABILITIES = ['publish', 'subscribe', 'presence'];
 const MAXIMUM_ABLY_TOKEN_TTL = 3600; // seconds
 
 const getEnvVar = (name) => {
