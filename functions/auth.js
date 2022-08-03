@@ -36,7 +36,7 @@ module.exports.authorizeMiddleware = async (req, res, next) => {
 
   if (!data) {
     logger.info(`User '${name}' not found.`);
-  } else if (comparePassword(pass, data.password, data.salt)) {
+  } else if (await comparePassword(pass, data.password, data.salt)) {
     const userType = data.type;
     if (!isUserType(userType)) {
       next(new Error(`User type '${userType}', as specified for user '${name}', is unknown.`));
@@ -63,22 +63,33 @@ module.exports.userIsOfTypeMiddleware = (type) => (req, res, next) => {
   next();
 };
 
-// Compares the input password and salt to the stored SHA256 hash in the user data
-const comparePassword = (input, hashedPassword, salt) => {
-  const hashedInput = crypto.createHash('sha256').update(salt + input).digest('hex');
-  return hashedInput === hashedPassword;
-};
+// Compares the input password and salt to the stored hash in the user data
+const comparePassword = async (input, hashedPassword, salt) => new Promise((resolve, reject) => {
+  crypto.scrypt(input, salt, 64, (err, derivedKey) => {
+    if (err) {
+      reject(err);
+      return;
+    }
+
+    resolve(crypto.timingSafeEqual(Buffer.from(hashedPassword, 'hex'), derivedKey));
+  });
+});
 
 // Creates a new user account with a specified username, password and userType
-module.exports.createUserAccount = (username, password, type) => {
+module.exports.createUserAccount = async (username, password, type) => new Promise((resolve, reject) => {
   const salt = crypto.randomBytes(16).toString('hex');
-  const hashedPassword = crypto.createHash('sha256').update(salt + password).digest('hex');
-  return firestore.collection('users').doc(username).set({
-    password: hashedPassword,
-    salt,
-    type,
+  crypto.scrypt(password, salt, 64, (err, derivedKey) => {
+    if (err) {
+      reject(err);
+      return;
+    }
+    resolve(firestore.collection('users').doc(username).set({
+      password: derivedKey.toString('hex'),
+      salt,
+      type,
+    }));
   });
-};
+});
 
 module.exports.createInitialUser = async () => {
   // Check if an initial user password is set, if not ignore the setup
