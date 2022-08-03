@@ -1,18 +1,16 @@
 const express = require('express');
 const cors = require('cors');
-const basicAuth = require('basic-auth');
 
 // The Cloud Functions for Firebase SDK to create Cloud Functions and set up triggers.
 const functions = require('firebase-functions');
 
 const {
-  firestore,
   fail,
-  isUserType,
-  STATUS_CODE_UNAUTHORIZED,
   STATUS_CODE_INTERNAL_SERVER_ERROR,
   ABLY_API_KEY_CUSTOMERS,
   ABLY_API_KEY_RIDERS,
+  USER_TYPE_ADMIN,
+  INITIAL_USER_PASSWORD,
 } = require('./common');
 
 const {
@@ -23,61 +21,22 @@ const {
   getGoogleMaps,
   getMapbox,
   getAbly,
+  createUser,
 } = require('./Handlers');
 
-const { logger } = functions;
+const {
+  createInitialUser,
+  authorizeMiddleware,
+  userIsOfTypeMiddleware,
+} = require('./auth');
 
 const SECRET_NAMES = [
   ABLY_API_KEY_RIDERS,
   ABLY_API_KEY_CUSTOMERS,
+  INITIAL_USER_PASSWORD,
   'MAPBOX_ACCESS_TOKEN',
   'GOOGLE_MAPS_API_KEY',
 ];
-
-const authorizeMiddleware = async (req, res, next) => {
-  const credentials = basicAuth(req);
-  if (!credentials) {
-    logger.info('Invalid Authorization header, or header missing.');
-    fail(res, STATUS_CODE_UNAUTHORIZED); // intentionally not providing a message as it could assist probing hackers
-    return;
-  }
-
-  const { name, pass } = credentials;
-
-  let data;
-  try {
-    const snapshot = await firestore.collection('users').doc(name).get();
-    data = snapshot.data();
-  } catch (error) {
-    // Ask Express to respond with HTTP 500 Internal Server Error.
-    // see: https://expressjs.com/en/guide/error-handling.html
-    // It's worth noting that, by default, Express serves this as HTML and includes all Error detail.
-    // It's also worth noting that this code was written against Express 4, given Express 5 was still in Beta - which
-    // explains why we need to do this error propogation 'by hand'.
-    next(error);
-    return;
-  }
-
-  if (!data) {
-    logger.info(`User '${name}' not found.`);
-  } else if (data.password === pass) {
-    const userType = data.type;
-    if (!isUserType(userType)) {
-      next(new Error(`User type '${userType}', as specified for user '${name}', is unknown.`));
-      return;
-    }
-
-    // make available for other middleware, specifically API handlers
-    res.locals.username = name;
-    res.locals.userType = userType;
-
-    next(); // Success
-    return;
-  }
-
-  logger.info(`Incorrect password supplied for user '${name}'. Received '${pass}', expected '${data.password}'.`);
-  fail(res, STATUS_CODE_UNAUTHORIZED); // intentionally not providing a message as it could assist probing hackers
-};
 
 const errorHandlingMiddleware = (err, req, res, next) => {
   if (res.headersSent) {
@@ -88,6 +47,9 @@ const errorHandlingMiddleware = (err, req, res, next) => {
   }
   fail(res, STATUS_CODE_INTERNAL_SERVER_ERROR, err.message);
 };
+
+// Create the initial user account (if it doesn't exist)
+createInitialUser();
 
 const app = express();
 
@@ -109,6 +71,8 @@ app.delete('/orders/:orderId', deleteOrder);
 app.get('/googleMaps', getGoogleMaps);
 app.get('/mapbox', getMapbox);
 app.get('/ably', getAbly);
+
+app.post('/admin/user', createUser, userIsOfTypeMiddleware(USER_TYPE_ADMIN));
 
 // Our custom error handler, which must be defined here, after other app.use() and routes calls.
 app.use(errorHandlingMiddleware);

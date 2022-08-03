@@ -15,14 +15,18 @@ exports.STATUS_CODE_INTERNAL_SERVER_ERROR = 500;
 
 exports.USER_TYPE_CUSTOMER = 'customer';
 exports.USER_TYPE_RIDER = 'rider';
+exports.USER_TYPE_ADMIN = 'admin';
 
 exports.ABLY_API_KEY_RIDERS = 'ABLY_API_KEY_RIDERS';
 exports.ABLY_API_KEY_CUSTOMERS = 'ABLY_API_KEY_CUSTOMERS';
+
+exports.INITIAL_USER_PASSWORD = 'INITIAL_USER_PASSWORD';
 
 exports.isUserType = (value) => {
   switch (value) {
     case this.USER_TYPE_CUSTOMER:
     case this.USER_TYPE_RIDER:
+    case this.USER_TYPE_ADMIN:
       return true;
 
     default:
