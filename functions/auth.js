@@ -1,6 +1,6 @@
 const basicAuth = require('basic-auth');
 const crypto = require('crypto');
-const functions = require('firebase-functions');
+const { logger } = require('firebase-functions');
 const {
   fail,
   STATUS_CODE_UNAUTHORIZED,
@@ -9,8 +9,6 @@ const {
   USER_TYPE_ADMIN,
   INITIAL_USER_PASSWORD,
 } = require('./common');
-
-const { logger } = functions;
 
 module.exports.authorizeMiddleware = async (req, res, next) => {
   const credentials = basicAuth(req);
