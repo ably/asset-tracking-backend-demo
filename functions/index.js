@@ -11,6 +11,7 @@ const {
   ABLY_API_KEY_RIDERS,
   USER_TYPE_ADMIN,
   INITIAL_USER_PASSWORD,
+  USER_TYPE_RIDER,
 } = require('./common');
 
 const {
@@ -64,7 +65,7 @@ app.use(authorizeMiddleware);
 // Our Express API.
 app.get('/', (req, res) => res.send({ })); // returns empty object, as JSON, by way of auth confirmation
 
-app.get('/orders', getOrders);
+app.get('/orders', getOrders, userIsOfTypeMiddleware(USER_TYPE_RIDER));
 app.post('/orders/', createOrder);
 app.put('/orders/:orderId', assignOrder);
 app.delete('/orders/:orderId', deleteOrder);

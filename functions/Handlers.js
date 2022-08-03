@@ -132,11 +132,6 @@ exports.createOrder = async (req, res, next) => {
 };
 
 exports.getOrders = async (req, res) => {
-  if (res.locals.userType !== USER_TYPE_RIDER) {
-    fail(res, STATUS_CODE_UNAUTHORIZED, 'This API is only for Rider use.');
-    return;
-  }
-
   const querySnapshot = await firestore.collection(COLLECTION_NAME_ORDERS).where('riderUsername', '==', null).get();
 
   res.json({ orderIds: querySnapshot.docs.map((order) => order.id) });
