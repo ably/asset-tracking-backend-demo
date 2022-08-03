@@ -16,6 +16,7 @@ const {
 } = require('./common');
 
 const {
+  getOrders,
   createOrder,
   assignOrder,
   deleteOrder,
@@ -101,6 +102,7 @@ app.use(authorizeMiddleware);
 // Our Express API.
 app.get('/', (req, res) => res.send({ })); // returns empty object, as JSON, by way of auth confirmation
 
+app.get('/orders', getOrders);
 app.post('/orders/', createOrder);
 app.put('/orders/:orderId', assignOrder);
 app.delete('/orders/:orderId', deleteOrder);
