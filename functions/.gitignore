@@ -1,1 +1,3 @@
 node_modules/
+# Firebase file for storing local secrets for development
+.secret.local
