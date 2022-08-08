@@ -238,11 +238,11 @@ Example response (prettified):
 {
   "orderId": 3,
   "ably": {
-    "token": "<SECRET_REDACTED>",
+    "token": "<SECRET_REDACTED>"
   },
   "googleMaps": {
-    "apiKey": "<SECRET_REDACTED>",
-  },
+    "apiKey": "<SECRET_REDACTED>"
+  }
 }
 ```
 
@@ -293,11 +293,11 @@ Example response (prettified):
     "latitude":1
   },
   "ably": {
-    "token": "<SECRET_REDACTED>",
+    "token": "<SECRET_REDACTED>"
   },
   "mapbox": {
-    "token": "<SECRET_REDACTED>",
-  },
+    "token": "<SECRET_REDACTED>"
+  }
 }
 ```
 
