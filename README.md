@@ -238,11 +238,41 @@ Example response (prettified):
 {
   "orderId": 3,
   "ably": {
-    "token": "<SECRET_REDACTED>",
+    "token": "<SECRET_REDACTED>"
   },
   "googleMaps": {
-    "apiKey": "<SECRET_REDACTED>",
-  },
+    "apiKey": "<SECRET_REDACTED>"
+  }
+}
+```
+
+See also: [Ably Token](#ably-token)
+
+### Get Unassigned Orders
+
+`GET /orders`
+
+Used by the Rider app to view all currently unassigned orders.
+
+Successful response status code: `200` OK
+
+Response properties:
+
+- `orderIds`: An array of unique order identifiers for all currently unassigned orders 
+
+Example request:
+
+```bash
+curl --verbose \
+  https://<firebase-region>-<firebase-project-name>.cloudfunctions.net/deliveryService/orders \
+  --user "username:password" 
+```
+
+Example response (prettified):
+
+```json
+{
+  "orderIds": [4, 8, 15, 16, 23, 42]
 }
 ```
 
@@ -293,11 +323,11 @@ Example response (prettified):
     "latitude":1
   },
   "ably": {
-    "token": "<SECRET_REDACTED>",
+    "token": "<SECRET_REDACTED>"
   },
   "mapbox": {
-    "token": "<SECRET_REDACTED>",
-  },
+    "token": "<SECRET_REDACTED>"
+  }
 }
 ```
 

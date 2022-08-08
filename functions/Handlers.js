@@ -88,6 +88,8 @@ exports.createOrder = async (req, res, next) => {
       customerUsername: username,
       from,
       to,
+      // riderUsername has to be explicitly set to null as firestore cannot select by missing fields
+      riderUsername: null,
     });
 
     // Transaction Success
@@ -127,6 +129,12 @@ exports.createOrder = async (req, res, next) => {
         apiKey: GOOGLE_MAPS_API_KEY,
       },
     });
+};
+
+exports.getOrders = async (req, res) => {
+  const querySnapshot = await firestore.collection(COLLECTION_NAME_ORDERS).where('riderUsername', '==', null).get();
+
+  res.json({ orderIds: querySnapshot.docs.map((order) => order.id) });
 };
 
 exports.assignOrder = async (req, res, next) => {
