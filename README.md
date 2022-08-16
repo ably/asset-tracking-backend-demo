@@ -91,6 +91,7 @@ we've conformed naming of secrets in the three locations you'll find them, that 
 
 - **Publish** - publish messages to channels
 - **Subscribe** - subscribe to receive messages and presence state changes on channels
+- **Presence** - register presence on a channel (enter, update and leave)
 
 `ABLY_API_KEY_CUSTOMERS` must have been created with the following capabilities:
 
@@ -509,7 +510,7 @@ Issued with:
 - [capability](https://ably.com/docs/core-features/authentication#capability-operations):
   - granted for just the Ably [channels](https://ably.com/docs/realtime/channels) for orders which the authenticated user calling the endpoint needs to interact - where those channel names have the `tracking:` [channel namespace](https://ably.com/docs/realtime/channels#channel-namespaces) followed by the order identifier
   - depending on the type of the authenticated user calling the endpoint which returned the token:
-    - **Rider**: `subscribe` and `publish`
+    - **Rider**: `subscribe`, `publish` and `presence`
     - **Customer**: `subscribe`, `publish`, `history` and `presence`
 - client identifier (`x-ably-clientId`) set to the `user-id` (username) of the authenticated user calling the endpoint which returned the token
 
