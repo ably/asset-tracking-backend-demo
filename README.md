@@ -1,3 +1,6 @@
+> [!IMPORTANT]
+> As of September 2025, Ably Asset Tracking has been sunsetted and is no longer being maintained.
+
 # Ably Asset Tracking Backend Demo
 
 [![.github/workflows/check.yml](https://github.com/ably/asset-tracking-backend-demo/actions/workflows/check.yml/badge.svg)](https://github.com/ably/asset-tracking-backend-demo/actions/workflows/check.yml)
